@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ThinkPad TrackPoint Mouse Emulator | iPhoneを極上の「赤ポチ」マウスに</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="iPhoneをThinkPadの「赤ポチ（TrackPoint）」および「クラシック3ボタン」を模した極上の入力デバイスに変身させ、MacをWiFi経由で直感的に遠隔操作できるプレミアムなマウスエミュレーターです。" />
+    <meta name="keywords" content="ThinkPad, TrackPoint, 赤ポチ, マウスエミュレーター, iPhone, Mac, WiFiマウス, ハプティクス" />
+    <meta property="og:title" content="ThinkPad TrackPoint Mouse Emulator" />
+    <meta property="og:description" content="iPhoneを極上の「赤ポチ」に変身させる。物理移動同期型ステップハプティクスや3DチルトUIを搭載したプレミアムなマウスエミュレーター。" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="./assets/index-DFYEJI_K.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BR8hVvZb.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-container">
+        <div class="logo">
+          <span class="logo-dot"></span>
+          <span class="logo-text">TrackPoint<span>Emulator</span></span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">特徴</a>
+          <a href="#simulator">体験デモ</a>
+          <a href="#setup">セットアップ</a>
+          <a href="#protocol">通信プロトコル</a>
+          <a href="https://github.com/takumi/smartphone_thinkpad_mouse" class="btn-github" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.437 22 12.017 22 6.484 17.522 2 12 2z"/>
+            </svg>
+            GitHub
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-bg-glow"></div>
+        <div class="container hero-container">
+          <div class="hero-text">
+            <div class="badge">PRO GRADE INPUT EMULATOR</div>
+            <h1>iPhoneを、極上の<br><span class="highlight-red">「赤ポチ」</span>に変身させる。</h1>
+            <p class="hero-lead">
+              ThinkPad特有の粘り気のある操作感、3DチルトUI、指の移動にシンクロするハプティクス（振動）を完璧に再現。MacをWiFi経由で操るプレミアムな入力システム。
+            </p>
+            <div class="hero-actions">
+              <a href="#simulator" class="btn btn-primary">ブラウザで体験する</a>
+              <a href="#setup" class="btn btn-secondary">セットアップ手順</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="phone-mockup">
+              <div class="phone-screen">
+                <div class="status-bar">
+                  <span>9:41</span>
+                  <div class="status-icons">📶 🔋</div>
+                </div>
+                <div class="app-ui">
+                  <div class="app-header-ui">
+                    <span class="app-title">🔴 ThinkPad Mouse</span>
+                    <span id="app-status" class="app-status-badge connected">接続完了</span>
+                  </div>
+                  <!-- Interactive Simulator Embedded inside phone mockup -->
+                  <div class="simulator-wrapper">
+                    <div id="sim-trackpoint-area" class="sim-trackpoint-area">
+                      <div id="sim-deadzone-circle" class="sim-deadzone-circle"></div>
+                      <div id="sim-anchor-point" class="sim-anchor-point"></div>
+                      <div id="sim-trackpoint-cap" class="sim-trackpoint-cap">
+                        <div class="cap-texture"></div>
+                      </div>
+                    </div>
+                    <div class="sim-buttons-container">
+                      <button id="sim-btn-left" class="sim-btn sim-btn-left">
+                        <span class="stripe red-stripe"></span>
+                      </button>
+                      <button id="sim-btn-middle" class="sim-btn sim-btn-middle">
+                        <span class="stripe blue-stripe"></span>
+                      </button>
+                      <button id="sim-btn-right" class="sim-btn sim-btn-right">
+                        <span class="stripe red-stripe"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Stream Console (Packet visualizer) -->
+      <section id="simulator" class="live-console-section">
+        <div class="container">
+          <div class="console-box">
+            <div class="console-header">
+              <span class="console-dot red"></span>
+              <span class="console-dot yellow"></span>
+              <span class="console-dot green"></span>
+              <span class="console-title">Live Server Output (TCP/Bonjour Stream)</span>
+              <div class="console-controls">
+                <label class="toggle-control">
+                  <input type="checkbox" id="sound-toggle" checked>
+                  <span class="toggle-label">ハプティクス（擬似音）</span>
+                </label>
+                <label class="toggle-control">
+                  <input type="checkbox" id="deadzone-toggle" checked>
+                  <span class="toggle-label">デッドゾーン枠を表示</span>
+                </label>
+              </div>
+            </div>
+            <div class="console-body">
+              <div class="console-panel-left">
+                <h3>シミュレーターの操作方法</h3>
+                <p>上のiPhone画面の「赤ポチ」をドラッグして動かしてください。</p>
+                <ul>
+                  <li><strong>3Dチルト</strong>: 動かす方向に赤ポチが立体的に傾きます。</li>
+                  <li><strong>ステップハプティクス</strong>: 指を動かす距離に応じて、一定間隔（12px）で心地よいクリック音（ハプティクス代替）が鳴ります。指を止めると音も止まります。</li>
+                  <li><strong>クラシック3ボタン</strong>: 左右のクリックに加え、中央の青ボタンを押しながらドラッグすると、右側のダミー画面が縦横にスクロール（ナチュラルスクロール補正）します。</li>
+                </ul>
+              </div>
+              <div class="console-panel-right">
+                <div class="scroll-demo-area" id="scroll-demo-area">
+                  <div class="scroll-content">
+                    <h4>スクロールデモエリア</h4>
+                    <p>中央の青いスクロールボタンを押しながら赤ポチをドラッグすると、このエリアがスクロールします。ナチュラルスクロールが再現されていることを実感してください。</p>
+                    <p>スクロールの滑らかさは、Bonjour通信を介して送信される高解像度な相対ベクトルによって実現されています。</p>
+                    <p>ThinkPadの赤いドットは、単なるシンボルではなく、指先の力をダイレクトにカーソル速度に変換する極上のセンサーです。</p>
+                    <p>このiOS版では、物理的な変位量（タッチ移動距離）に応じたハプティクスフィードバックを組み合わせることで、今までにない操作フィールを実現しました。</p>
+                    <p>さらにテストテキスト: スクロール可能な領域を十分に確保しています。スクロールボタンを押しながら操作してみてください。</p>
+                    <p>ドラッグ＆ドロップ動作時には、マルチタッチ競合を排除するための特別なジェスチャー処理が行われ、ホールド状態が100%維持されます。</p>
+                  </div>
+                </div>
+                <div class="packet-terminal">
+                  <div class="terminal-lines" id="terminal-lines">
+                    <span class="line-system">[System] Waiting for touch input on trackpoint...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="features">
+        <div class="container">
+          <div class="section-header">
+            <h2>プロダクトの特徴</h2>
+            <p>ただのマウスアプリではない。ThinkPad愛好家がディテールにこだわり抜いたプレミアムな設計。</p>
+          </div>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon red-glow">🔴</div>
+              <h3>極上のTrackPoint UI & アニメーション</h3>
+              <p>指の力と方向に合わせて赤ポチが3Dで傾き、影がリアルに変化。画面のどこをタッチしても自動でそこが支点になり、吸い付くような操作を開始できます。</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon blue-glow">⚡</div>
+              <h3>物理移動同期ステップハプティクス</h3>
+              <p>時間ベースの振動を廃止し、指の実際の移動距離（12px）に完全にシンクロしたハプティクス（コココという微細な抵抗感）をトリガー。指を止めるとハプティクスも瞬時に停止します。</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon green-glow">🤝</div>
+              <h3>完璧なドラッグ＆ドロップ</h3>
+              <p>SwiftUIのジェスチャー競合をバイパスする「UIKitブリッジ型タッチ検出」を新設計。左クリックを押しながら別指で自在にスライドさせてもクリックが絶対に途切れず、快適なドラッグが可能です。</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon purple-glow">🔄</div>
+              <h3>直感的ナチュラルスクロール</h3>
+              <p>中央の青いスクロールボタンを押しながらのスクロールは、Macのスクロール方向に完全に最適化。短押し（0.35秒未満）時は自動で「ミドルクリック」として認識します。</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon yellow-glow">📶</div>
+              <h3>スマートサイレント自動接続</h3>
+              <p>Bonjourサービスを採用し、同一ネットワーク上のMacを自動探索。前回の接続先を記憶し、起動するだけで自動接続。Macのスリープ復帰時もバックグラウンドで即座に再接続します。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Setup Guide Section -->
+      <section id="setup" class="setup-guide">
+        <div class="container">
+          <div class="section-header">
+            <h2>セットアップ方法</h2>
+            <p>Mac側で受信用のヘルパーを実行し、iOSアプリをインストールするだけで即座に使えます。</p>
+          </div>
+          <div class="setup-steps">
+            <div class="setup-step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h3>Mac側: ヘルパープログラムの起動</h3>
+                <p>ターミナルを起動し、Mac側ヘルパーのディレクトリへ移動して実行します。</p>
+                <div class="code-block-wrapper">
+                  <pre><code id="code-mac-setup">cd macOS_thinkpad_helper
+swift run</code></pre>
+                  <button class="btn-copy" data-target="code-mac-setup">コピー</button>
+                </div>
+                <div class="tip-box">
+                  <strong>💡 初回起動時</strong>
+                  <p>Macの「システム設定」>「プライバシーとセキュリティ」>「アクセシビリティ」で、ターミナルに対するコンピューターの制御許可が必要です。</p>
+                </div>
+              </div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h3>iPhone側: iOSアプリのビルドと起動</h3>
+                <p>Xcodeを使用してiPhone実機にアプリをインストールします。</p>
+                <ol>
+                  <li>iPhoneをMacにUSBケーブルで接続します。</li>
+                  <li><code>smartphone_thinkpad_mouse.xcodeproj</code> を Xcode で開きます。</li>
+                  <li>開発ターゲットとして実機（iPhone）を選択し、<strong>Run (⌘R)</strong> を実行します。</li>
+                  <li>アプリが起動すると、自動的にBonjourで同一ネットワーク上のMacを検出し、自動接続されます。</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Protocol Section -->
+      <section id="protocol" class="protocol-spec">
+        <div class="container">
+          <div class="section-header">
+            <h2>通信プロトコル仕様</h2>
+            <p>Bonjourによって動的に決定されたポートで、極めて軽量なTCPパケット（JSON形式）を遅延ゼロでやり取りします。</p>
+          </div>
+          <div class="protocol-grid">
+            <div class="protocol-card">
+              <h4>🖱️ マウス相対移動 (Move)</h4>
+              <div class="code-block-wrapper">
+                <pre><code>{
+  "type": "move",
+  "dx": 12.34,
+  "dy": -5.67
+}</code></pre>
+              </div>
+            </div>
+            <div class="protocol-card">
+              <h4>🔄 スクロールホイール (Scroll)</h4>
+              <div class="code-block-wrapper">
+                <pre><code>{
+  "type": "scroll",
+  "dx": 1.5,
+  "dy": -3.2
+}</code></pre>
+              </div>
+            </div>
+            <div class="protocol-card">
+              <h4>🔴 マウスボタン操作 (Button)</h4>
+              <div class="code-block-wrapper">
+                <pre><code>{
+  "type": "button",
+  "buttonType": 1, 
+  "isDown": 1
+}</code></pre>
+              </div>
+              <p class="desc">
+                <code>buttonType</code>: 1 = 左, 2 = 右, 3 = ミドル<br>
+                <code>isDown</code>: 1 = 押し下げ, 0 = 離す, 2 = 瞬時クリック
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <div class="footer-brand">
+          <span class="logo-dot"></span>
+          <span class="logo-text">TrackPoint<span>Emulator</span></span>
+        </div>
+        <p class="copyright">&copy; 2026 ThinkPad TrackPoint Mouse Emulator Project. Released under the MIT License.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>
