@@ -16,6 +16,7 @@
   --red: #d94b3d;
   --orange: #e88b3a;
   --line: #d9ddcc;
+  --shadow: #14351f;
   --radius: 8px;
 }
 
@@ -30,6 +31,7 @@ html {
 body {
   margin: 0;
   background:
+    radial-gradient(circle at 16px 16px, rgba(217, 75, 61, .08) 0 8px, transparent 9px),
     radial-gradient(circle at 8% 16%, rgba(79, 138, 63, .18), transparent 18rem),
     radial-gradient(circle at 92% 8%, rgba(143, 198, 215, .22), transparent 20rem),
     linear-gradient(90deg, rgba(34, 84, 61, .05) 1px, transparent 1px),
@@ -40,6 +42,38 @@ body {
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   line-height: 1.7;
   overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body::before {
+  left: -56px;
+  top: 140px;
+  width: 150px;
+  height: 520px;
+  background:
+    radial-gradient(circle at 50% 8%, var(--leaf) 0 18px, transparent 19px),
+    radial-gradient(circle at 50% 24%, var(--green-2) 0 22px, transparent 23px),
+    radial-gradient(circle at 50% 42%, var(--leaf) 0 19px, transparent 20px),
+    radial-gradient(circle at 50% 60%, var(--green-2) 0 24px, transparent 25px),
+    radial-gradient(circle at 50% 78%, var(--leaf) 0 20px, transparent 21px);
+  border-right: 8px solid rgba(34, 84, 61, .25);
+}
+
+body::after {
+  right: -72px;
+  bottom: 60px;
+  width: 168px;
+  height: 168px;
+  border: 18px solid rgba(232, 139, 58, .28);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 10px rgba(34, 84, 61, .18);
 }
 
 a {
@@ -72,7 +106,6 @@ nav,
 .num,
 dt,
 .tools li,
-.award-list span,
 .badge {
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 }
@@ -142,6 +175,11 @@ nav a:hover {
   overflow: hidden;
 }
 
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
 .hero::before {
   content: "";
   position: absolute;
@@ -159,7 +197,91 @@ nav a:hover {
 .hero-content,
 .hero-visual {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+.deco {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.deco-vine {
+  left: clamp(10px, 3vw, 42px);
+  top: 86px;
+  width: 86px;
+  height: 280px;
+  border-left: 8px solid var(--green);
+  border-radius: 80px;
+}
+
+.deco-vine::before,
+.deco-vine::after {
+  content: "";
+  position: absolute;
+  left: -36px;
+  width: 58px;
+  height: 38px;
+  background: var(--leaf);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-28deg);
+}
+
+.deco-vine::before {
+  top: 48px;
+}
+
+.deco-vine::after {
+  top: 148px;
+  left: 0;
+  transform: scaleX(-1) rotate(-28deg);
+}
+
+.deco-compass {
+  right: clamp(18px, 6vw, 90px);
+  top: 96px;
+  width: 128px;
+  height: 128px;
+  background: #fff;
+  border: 10px solid var(--navy);
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px var(--yellow);
+  opacity: .95;
+}
+
+.deco-compass::before {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  background: linear-gradient(135deg, transparent 0 43%, var(--red) 44% 56%, transparent 57%),
+    linear-gradient(45deg, transparent 0 43%, var(--green) 44% 56%, transparent 57%);
+  clip-path: polygon(50% 0, 64% 38%, 100% 50%, 64% 62%, 50% 100%, 36% 62%, 0 50%, 36% 38%);
+}
+
+.deco-patch {
+  left: clamp(18px, 8vw, 132px);
+  bottom: 138px;
+  width: 106px;
+  height: 106px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  border: 8px solid #fff;
+  outline: 6px solid var(--yellow);
+  clip-path: polygon(50% 0, 94% 25%, 94% 76%, 50% 100%, 6% 76%, 6% 25%);
+  color: #fff;
+  font-weight: 950;
+  transform: rotate(-12deg);
+}
+
+.deco-rope {
+  right: clamp(12px, 4vw, 60px);
+  bottom: 132px;
+  width: 220px;
+  height: 36px;
+  background: repeating-linear-gradient(135deg, #9a6b36 0 12px, #e0bd73 12px 24px);
+  border-radius: 999px;
+  transform: rotate(-9deg);
 }
 
 .kicker,
@@ -493,6 +615,7 @@ h1 {
 }
 
 .intro {
+  position: relative;
   width: min(960px, calc(100% - 40px));
   margin: 0 auto;
   padding: clamp(28px, 5vw, 44px);
@@ -500,6 +623,27 @@ h1 {
   border: 2px solid var(--line);
   border-left: 10px solid var(--green);
   border-radius: var(--radius);
+}
+
+.intro::before,
+.intro::after {
+  content: "";
+  position: absolute;
+  top: -18px;
+  width: 96px;
+  height: 36px;
+  background: rgba(240, 200, 75, .78);
+  border: 2px solid rgba(138, 90, 47, .22);
+}
+
+.intro::before {
+  left: 28px;
+  transform: rotate(-6deg);
+}
+
+.intro::after {
+  right: 28px;
+  transform: rotate(7deg);
 }
 
 .intro p {
@@ -510,10 +654,24 @@ h1 {
 }
 
 .story {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, .9fr) minmax(320px, 1fr);
   align-items: center;
   gap: clamp(34px, 6vw, 80px);
+}
+
+.story::before {
+  content: "森の記録";
+  position: absolute;
+  left: -10px;
+  top: 42px;
+  padding: 8px 14px;
+  background: var(--orange);
+  color: #fff;
+  border-radius: var(--radius);
+  font-weight: 950;
+  transform: rotate(-5deg);
 }
 
 .section-copy h2,
@@ -545,6 +703,18 @@ h1 {
   border: 3px solid var(--green);
   border-radius: var(--radius);
   overflow: hidden;
+}
+
+.map-card::before {
+  content: "X";
+  position: absolute;
+  right: 13%;
+  top: 18%;
+  z-index: 2;
+  color: var(--red);
+  font-size: 3rem;
+  font-weight: 950;
+  transform: rotate(12deg);
 }
 
 .map-card svg {
@@ -594,6 +764,7 @@ h1 {
 }
 
 .trial {
+  position: relative;
   min-height: 300px;
   padding: 24px;
   background:
@@ -601,6 +772,18 @@ h1 {
     #fff;
   border: 2px solid var(--line);
   border-radius: var(--radius);
+}
+
+.trial::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: -12px;
+  height: 22px;
+  background: rgba(240, 200, 75, .78);
+  border: 1px solid rgba(138, 90, 47, .24);
+  transform: rotate(-1.5deg);
 }
 
 .trial.locked {
@@ -666,6 +849,7 @@ h1 {
 }
 
 .classified {
+  position: relative;
   display: grid;
   grid-template-columns: 150px 1fr;
   gap: clamp(22px, 5vw, 58px);
@@ -674,6 +858,18 @@ h1 {
   background: #fff;
   border: 3px solid var(--green);
   border-radius: var(--radius);
+}
+
+.classified::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  width: 76px;
+  height: 76px;
+  background: var(--red);
+  clip-path: polygon(50% 0, 100% 34%, 82% 100%, 18% 100%, 0 34%);
+  opacity: .9;
 }
 
 .stamp {
@@ -698,8 +894,7 @@ h1 {
   list-style: none;
 }
 
-.tools li,
-.award-list span {
+.tools li {
   padding: 10px 14px;
   background: #eef4e8;
   border: 2px solid var(--line);
@@ -708,32 +903,25 @@ h1 {
   font-weight: 900;
 }
 
-.award-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.award-list span:nth-child(2n) {
-  background: #fff3cf;
-}
-
-.award-list span:nth-child(3n) {
-  background: #e7f4f8;
-}
-
-.secret-awards span {
-  min-width: 104px;
-  text-align: center;
-  background: var(--navy);
-  color: #fff;
-  border-color: var(--navy);
-}
-
 .info {
+  position: relative;
   display: grid;
   grid-template-columns: .7fr 1fr;
   gap: clamp(28px, 6vw, 70px);
+}
+
+.info::before {
+  content: "準備リスト";
+  position: absolute;
+  right: 0;
+  top: 42px;
+  padding: 9px 16px;
+  background: var(--yellow);
+  color: var(--green);
+  border: 3px solid var(--green);
+  border-radius: var(--radius);
+  font-weight: 950;
+  transform: rotate(4deg);
 }
 
 .info-table {
@@ -879,6 +1067,23 @@ footer {
   .hero {
     min-height: auto;
     padding: 42px 18px 54px;
+  }
+
+  .deco-vine,
+  .deco-compass,
+  .deco-rope {
+    display: none;
+  }
+
+  .deco-patch {
+    left: auto;
+    right: 18px;
+    bottom: 22px;
+    width: 74px;
+    height: 74px;
+    border-width: 5px;
+    outline-width: 4px;
+    font-size: .8rem;
   }
 
   h1 {
