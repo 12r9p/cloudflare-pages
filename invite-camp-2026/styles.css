@@ -262,12 +262,12 @@ h1 {
 }
 
 .hero-visual {
-  min-height: 560px;
+  min-height: 580px;
 }
 
 .forest-scene {
   position: absolute;
-  inset: 12px 0 78px;
+  inset: 12px 0 112px;
   background:
     linear-gradient(180deg, #bfe0d8 0 42%, #dcefc8 42% 100%);
   border: 3px solid var(--green);
@@ -458,7 +458,7 @@ h1 {
   position: absolute;
   left: 24px;
   right: 24px;
-  bottom: 0;
+  bottom: 10px;
   display: grid;
   grid-template-columns: 1.1fr repeat(3, 1fr);
   gap: 8px;
@@ -817,11 +817,15 @@ footer {
   }
 
   .hero-visual {
-    min-height: 450px;
+    min-height: 500px;
   }
 
   .mission-ticket {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .forest-scene {
+    inset: 12px 0 148px;
   }
 
   .trial-grid {
@@ -863,11 +867,11 @@ footer {
   }
 
   .hero-visual {
-    min-height: 430px;
+    min-height: 560px;
   }
 
   .forest-scene {
-    inset: 0 0 98px;
+    inset: 0 0 226px;
   }
 
   .tree {
@@ -901,6 +905,7 @@ footer {
   .mission-ticket {
     left: 0;
     right: 0;
+    bottom: 8px;
     grid-template-columns: 1fr;
   }
 
