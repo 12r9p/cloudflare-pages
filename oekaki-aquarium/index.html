@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEKAKI AQUARIUM // おえかき水族館 - 技術仕様・アーキテクチャLP</title>
+  <meta name="description" content="自分で描いた魚が仮想水槽を泳ぎ回る。複数ディスプレイの連結、自前実装の遊泳物理、PNG tEXtバイナリハックなど、おえかき水族館の高度なアーキテクチャとこだわりを伝える技術LP。">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --bg-deep: #0f172a;
+      --primary: #06b6d4;      /* Cyan */
+      --primary-glow: rgba(6, 182, 212, 0.4);
+      --secondary: #ec4899;    /* Pink/Magenta */
+      --secondary-glow: rgba(236, 72, 153, 0.4);
+      --accent: #10b981;       /* Emerald */
+      --accent-glow: rgba(16, 185, 129, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: rgba(30, 41, 59, 0.45);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --font-title: 'Outfit', 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, #020617 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-deep);
+      border: 2px solid var(--bg-dark);
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(2, 6, 23, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+
+    .logo {
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      fill: url(#logo-grad);
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+      font-family: var(--font-title);
+    }
+
+    nav a:hover {
+      color: var(--primary);
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 160px 0 100px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-tag {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 12px var(--primary-glow);
+      display: inline-block;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-title);
+      font-size: 3.8rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff 30%, #a5f3fc 70%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    .hero p.lead {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 64px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-family: var(--font-title);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #0891b2);
+      color: #000;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(6, 182, 212, 0.6);
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .hero-preview {
+      width: 100%;
+      max-width: 1000px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(6, 182, 212, 0.15);
+      position: relative;
+    }
+
+    .hero-preview img {
+      width: 100%;
+      display: block;
+    }
+
+    .hero-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, var(--bg-dark) 0%, transparent 30%);
+      pointer-events: none;
+    }
+
+    /* Section Global Styles */
+    section {
+      padding: 100px 0;
+      border-top: 1px solid var(--card-border);
+      position: relative;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .section-title h2 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title h2 span {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-title p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Core Concepts Grid */
+    .concepts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .concept-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 40px 32px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .concept-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(6, 182, 212, 0.3);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(6, 182, 212, 0.05);
+    }
+
+    .concept-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(6, 182, 212, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+
+    .concept-card:nth-child(2) .concept-icon {
+      background: rgba(236, 72, 153, 0.1);
+      color: var(--secondary);
+    }
+
+    .concept-card:nth-child(3) .concept-icon {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent);
+    }
+
+    .concept-card h3 {
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .concept-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+
+    .concept-tag {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Biology Models Section */
+    .biology-tabs-container {
+      margin-top: 40px;
+    }
+
+    .biology-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .bio-tab {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: var(--font-title);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .bio-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .bio-tab.active {
+      background: linear-gradient(135deg, var(--primary), rgba(6, 182, 212, 0.2));
+      border-color: var(--primary);
+      color: #000;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .bio-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 40px;
+      backdrop-filter: blur(12px);
+      display: none;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .bio-content.active {
+      display: grid;
+    }
+
+    .bio-text h3 {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bio-text h3 span.en {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .bio-text p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 1.05rem;
+    }
+
+    .bio-points {
+      margin-bottom: 24px;
+      list-style: none;
+    }
+
+    .bio-points li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .bio-points li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .bio-code-pane {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 24px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      overflow-x: auto;
+    }
+
+    /* 3D Layers Section */
+    .layers-container {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    /* 3D Layer Visual Demo */
+    .layers-visual-3d {
+      perspective: 1000px;
+      height: 480px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .layers-stack {
+      transform: rotateX(60deg) rotateZ(-30deg);
+      transform-style: preserve-3d;
+      position: relative;
+      width: 300px;
+      height: 200px;
+      transition: transform 0.5s ease;
+    }
+
+    .layers-stack:hover {
+      transform: rotateX(50deg) rotateZ(-20deg) scale(1.05);
+    }
+
+    .layer-plane {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(2px);
+    }
+
+    .layer-plane-foreground {
+      transform: translateZ(100px);
+      border-color: var(--secondary);
+      background: rgba(236, 72, 153, 0.08);
+      box-shadow: 0 0 40px rgba(236, 72, 153, 0.2);
+    }
+
+    .layer-plane-midground {
+      transform: translateZ(0px);
+      border-color: var(--primary);
+      background: rgba(6, 182, 212, 0.08);
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+    }
+
+    .layer-plane-background {
+      transform: translateZ(-100px);
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+    }
+
+    .layer-plane-title {
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .layer-plane-foreground .layer-plane-title { color: var(--secondary); }
+    .layer-plane-midground .layer-plane-title { color: var(--primary); }
+    .layer-plane-background .layer-plane-title { color: var(--accent); }
+
+    .layer-plane-specs {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .layer-plane-fish {
+      position: absolute;
+      width: 40px;
+      height: 20px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+    }
+
+    .layer-plane-foreground .layer-plane-fish {
+      color: var(--secondary);
+      top: 30%; left: 40%;
+      transform: scale(1.3);
+    }
+
+    .layer-plane-midground .layer-plane-fish {
+      color: var(--primary);
+      top: 60%; left: 20%;
+      transform: scale(0.9);
+    }
+
+    .layer-plane-background .layer-plane-fish {
+      color: var(--accent);
+      top: 20%; left: 70%;
+      transform: scale(0.5);
+    }
+
+    .layers-explain h3 {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .layers-explain p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 1.05rem;
+    }
+
+    .layers-rule-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .layers-rule-card h4 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .layers-rule-card p {
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
+    /* Architecture / Flow Section */
+    .arch-content {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .arch-text h3 {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+
+    .arch-text p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .arch-specs {
+      list-style: none;
+    }
+
+    .arch-spec-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .arch-spec-marker {
+      width: 24px;
+      height: 24px;
+      background: rgba(6, 182, 212, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    .arch-spec-info h4 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .arch-spec-info p {
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
+    /* Diagram UI */
+    .arch-diagram {
+      background: var(--bg-deep);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+    }
+
+    .dia-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .dia-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .dia-node {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      flex: 1;
+      margin: 0 8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .dia-node.active-node {
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .dia-node.active-node-pink {
+      border-color: var(--secondary);
+      box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+    }
+
+    .dia-node.server-node {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+      background: rgba(16, 185, 129, 0.02);
+    }
+
+    .dia-node h5 {
+      color: var(--text-main);
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .dia-node span {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      display: block;
+    }
+
+    .dia-label {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--primary);
+      background: var(--bg-dark);
+      padding: 2px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--primary-glow);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary-glow);
+      transform: translateY(-4px);
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-code {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 16px;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      color: #e2e8f0;
+    }
+
+    .feature-code span.keyword { color: #f472b6; }
+    .feature-code span.comment { color: #64748b; }
+    .feature-code span.number  { color: #fbbf24; }
+    .feature-code span.string  { color: #34d399; }
+
+    /* Project Structure Tour */
+    .tour-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 40px;
+      backdrop-filter: blur(12px);
+    }
+
+    .structure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 48px;
+    }
+
+    .folder-tree {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .tree-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .tree-item.active {
+      color: var(--primary);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .tree-indent-1 { padding-left: 24px; }
+    .tree-indent-2 { padding-left: 48px; }
+
+    .tour-detail-pane {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .tour-detail-pane h4 {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tour-detail-pane p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .tour-detail-pane ul {
+      list-style: none;
+    }
+
+    .tour-detail-pane li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .tour-detail-pane li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+
+    /* Getting Started (CLI) */
+    .cli-box {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 40px auto 0;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .cli-header {
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 20px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .cli-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .cli-dot:nth-child(1) { background: #ef4444; }
+    .cli-dot:nth-child(2) { background: #eab308; }
+    .cli-dot:nth-child(3) { background: #22c55e; }
+    
+    .cli-title {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .cli-body {
+      padding: 24px;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+
+    .cli-line {
+      margin-bottom: 8px;
+      display: flex;
+    }
+
+    .cli-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .cli-prompt {
+      color: var(--primary);
+      margin-right: 12px;
+      user-select: none;
+    }
+
+    /* Footer */
+    footer {
+      background: #030712;
+      border-top: 1px solid var(--card-border);
+      padding: 48px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    footer p {
+      margin-bottom: 12px;
+    }
+
+    /* Decorative Floating Fish (CSS Animation) */
+    .decor-fish {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.15;
+      animation: swim linear infinite;
+      z-index: 0;
+    }
+
+    .decor-fish-1 {
+      top: 25%;
+      left: -100px;
+      width: 120px;
+      animation-duration: 25s;
+    }
+
+    .decor-fish-2 {
+      top: 60%;
+      right: -100px;
+      width: 90px;
+      animation-duration: 20s;
+      animation-name: swim-reverse;
+    }
+
+    .decor-fish-3 {
+      top: 85%;
+      left: -100px;
+      width: 150px;
+      animation-duration: 35s;
+    }
+
+    @keyframes swim {
+      0% {
+        transform: translate(0, 0) scaleX(1);
+      }
+      49% {
+        transform: translate(105vw, 15px) scaleX(1);
+      }
+      50% {
+        transform: translate(105vw, 15px) scaleX(-1);
+      }
+      99% {
+        transform: translate(0, 0) scaleX(-1);
+      }
+      100% {
+        transform: translate(0, 0) scaleX(1);
+      }
+    }
+
+    @keyframes swim-reverse {
+      0% {
+        transform: translate(0, 0) scaleX(-1);
+      }
+      49% {
+        transform: translate(-105vw, -25px) scaleX(-1);
+      }
+      50% {
+        transform: translate(-105vw, -25px) scaleX(1);
+      }
+      99% {
+        transform: translate(0, 0) scaleX(1);
+      }
+      100% {
+        transform: translate(0, 0) scaleX(-1);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero h1 {
+        font-size: 3rem;
+      }
+      .concepts-grid {
+        grid-template-columns: 1fr;
+      }
+      .biology-style-columns {
+        grid-template-columns: 1fr;
+      }
+      .bio-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .layers-container {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .layers-visual-3d {
+        height: 350px;
+      }
+      .arch-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .structure-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.3rem;
+      }
+      nav ul {
+        display: none; /* Mobile Navigation omitted for simplicity */
+      }
+      .btn {
+        width: 100%;
+      }
+      .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG gradient definition for logo -->
+  <svg style="width:0;height:0;position:absolute;">
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </svg>
+
+  <!-- Background Decorative Floating Neon Fish (SVG) -->
+  <svg class="decor-fish decor-fish-1" viewBox="0 0 100 40">
+    <path d="M10,20 Q30,5 60,15 T90,20 Q60,25 30,35 Z" fill="none" stroke="url(#logo-grad)" stroke-width="1.5" />
+    <path d="M90,20 L95,12 L92,20 L95,28 Z" fill="none" stroke="url(#logo-grad)" stroke-width="1.5" />
+  </svg>
+  <svg class="decor-fish decor-fish-2" viewBox="0 0 100 40">
+    <path d="M10,20 Q30,8 60,18 T90,20 Q60,22 30,32 Z" fill="none" stroke="var(--secondary)" stroke-width="1" />
+    <path d="M90,20 L94,15 L92,20 L94,25 Z" fill="none" stroke="var(--secondary)" stroke-width="1" />
+  </svg>
+  <svg class="decor-fish decor-fish-3" viewBox="0 0 100 40">
+    <path d="M10,20 Q35,3 65,13 T90,20 Q65,27 35,37 Z" fill="none" stroke="var(--primary)" stroke-width="2" />
+    <path d="M90,20 L96,10 L93,20 L96,30 Z" fill="none" stroke="var(--primary)" stroke-width="2" />
+  </svg>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-inner">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 100 100">
+          <path d="M15,50 C30,25 70,35 85,50 C70,65 30,75 15,50 Z" fill="none" stroke="url(#logo-grad)" stroke-width="6"/>
+          <path d="M85,50 L95,38 L92,50 L95,62 Z" fill="none" stroke="url(#logo-grad)" stroke-width="6"/>
+          <circle cx="35" cy="45" r="4" fill="var(--primary)" />
+        </svg>
+        <span>AQUARIUM</span>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#concept">コア概念</a></li>
+          <li><a href="#biology">生物物理モデル</a></li>
+          <li><a href="#layers">奥行きレイヤー</a></li>
+          <li><a href="#architecture">アーキテクチャ</a></li>
+          <li><a href="#features">技術のこだわり</a></li>
+          <li><a href="#structure">ソースコード構造</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <div class="container">
+      <section class="hero">
+        <span class="hero-tag">PRODUCTION-READY MULTI-DISPLAY SYSTEM</span>
+        <h1>おえかき水族館<br><span style="background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Beyond The Display</span></h1>
+        <p class="lead">自分で描いた魚が巨大な仮想水槽を泳ぎ回る。1台のBunサーバーと複数のPixiJSクライアントを繋ぐ、生物物理シミュレーションと分散レンダリングを追求した水槽展示システム。</p>
+        
+        <div class="hero-buttons">
+          <a href="#biology" class="btn btn-primary">物理モデルのこだわり</a>
+          <a href="#layers" class="btn btn-secondary">ダイナミックレイヤー</a>
+        </div>
+
+        <div class="hero-preview">
+          <img src="hero.png" alt="おえかき水族館 サイバーアクアリウム ヒーロービジュアル">
+        </div>
+      </section>
+    </div>
+
+    <!-- Core Concept Section -->
+    <section id="concept">
+      <div class="container">
+        <div class="section-title">
+          <h2>3つの<span>中心概念</span></h2>
+          <p>このシステムを安定稼働させ、柔軟なマルチディスプレイ構成を実現するために定義された、結合度の低いクリーンな抽象設計。</p>
+        </div>
+
+        <div class="concepts-grid">
+          <div class="concept-card">
+            <div class="concept-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3>水槽 (World)</h3>
+            <p>魚や背景画像、障害物、放流位置などが存在する「物理次元としての二次元空間」。画面の解像度とは完全に独立しており、座標値（例: 4000x1500）のみで表現されます。</p>
+            <span class="concept-tag">physics/world.ts</span>
+          </div>
+
+          <div class="concept-card">
+            <div class="concept-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3>ディスプレイ (Viewport)</h3>
+            <p>巨大な水槽空間の「一部を切り取る窓」。物理解像度に依存せず、自身が水槽座標のどこからどこまで（Viewport）を描画するかだけを担当し、座標変換を行います。</p>
+            <span class="concept-tag">frontend/display/renderer.ts</span>
+          </div>
+
+          <div class="concept-card">
+            <div class="concept-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3>魚 (Fish)</h3>
+            <p>水槽空間内を泳ぎ回る独立した生物エンティティ。現在位置や速度はサーバーが約60fpsで物理演算し、ディスプレイは送られてきた世界座標を描画するだけに徹します。</p>
+            <span class="concept-tag">shared/types.ts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Biology Models Section -->
+    <section id="biology" style="background: rgba(15, 23, 42, 0.2);">
+      <div class="container">
+        <div class="section-title">
+          <h2>自律する5つの<span>生物物理モデル</span></h2>
+          <p>おえかき水族館の魚たちは、単なる等速直線運動ではありません。各種の生態にアプローチした数理モデルを実装し、滑らかな生物的ゆらぎを描き出します。</p>
+        </div>
+
+        <div class="biology-tabs-container">
+          <div class="biology-tabs">
+            <div class="bio-tab active" data-target="bio-tuna">マグロ (Tuna)</div>
+            <div class="bio-tab" data-target="bio-school">イワシの群れ (School)</div>
+            <div class="bio-tab" data-target="bio-squid">イカ (Squid)</div>
+            <div class="bio-tab" data-target="bio-jellyfish">クラゲ (Jellyfish)</div>
+            <div class="bio-tab" data-target="bio-shark">サメ (Shark)</div>
+          </div>
+
+          <!-- Tuna -->
+          <div class="bio-content active" id="bio-tuna">
+            <div class="bio-text">
+              <h3>マグロ <span class="en">// Kick-and-Glide Model</span></h3>
+              <p>高速で力強く、ほぼ水平に泳ぎ続ける回遊魚モデル。</p>
+              <ul class="bio-points">
+                <li><strong>Kick-and-Glide 推進:</strong> 尾鰭を振る位相（Burst Phase）に同期して、蹴り出しの瞬間的な加速と滑空（Glide）による抵抗減速を周期的に繰り返し、リアルな推進トルクを表現。</li>
+                <li><strong>水平維持の拘束力:</strong> 基本的な水平巡航を保つため、縦（Y方向）の最大速度制限を厳しく（横速度の22％に）制限。</li>
+                <li><strong>自律的な深度チェンジ:</strong> <code>depth-behavior</code> に基づくバイオリズムによって、一定時間ごとにY軸の遊泳レーンを自律的に切り替えます。</li>
+              </ul>
+            </div>
+            <div class="bio-code-pane">
+<span class="comment">// packages/server/src/physics/tuna.ts</span>
+<span class="keyword">const</span> kickPulse = cosPhase * cosPhase; <span class="comment">// 蹴り出し</span>
+<span class="keyword">const</span> kickFactor = <span class="number">0.91</span> + kickPulse * <span class="number">0.18</span> * tailBeat;
+<span class="keyword">const</span> targetVX = speed * state.speedFactor * kickFactor * dir;
+<span class="comment">// 慣性スライド減衰</span>
+vel.x += (targetVX - vel.x) * accel;
+            </div>
+          </div>
+
+          <!-- School -->
+          <div class="bio-content" id="bio-school">
+            <div class="bio-text">
+              <h3>イワシの群れ <span class="en">// FOV-limited Boids Model</span></h3>
+              <p>視野角制限を加えた高度なBoids（群れ）アルゴリズムモデル。</p>
+              <ul class="bio-points">
+                <li><strong>視野角制限 (FOV):</strong> 進行方向から「背後120度（内積 < -0.5）」に位置する他魚を視界から除外。これにより、球体に集まるのではなく、前の魚の軌跡へ順繰りに追尾する自然な「帯状の潮流（ストリーム）」を形成。</li>
+                <li><strong>個体別の巡航速度ゆらぎ:</strong> 各個体に <code>0.75〜1.25</code> のランダムな巡航速度係数（personalSpeed）を設定し、群れの中で魚同士が追い越し・追い越されるリアルな前後移動を表現。</li>
+                <li><strong>同調性（Alignment）の強化:</strong> 群れ全体の進行方向の同調重みを高め、潮流としての一体感を際立たせています。</li>
+              </ul>
+            </div>
+            <div class="bio-code-pane">
+<span class="comment">// packages/server/src/physics/school.ts</span>
+<span class="comment">// 視野角（FOV）による他魚のブラインド判定</span>
+<span class="keyword">const</span> dot = (toOtherX / dist) * hx + (toOtherY / dist) * hy;
+<span class="keyword">if</span> (dot &lt; -<span class="number">0.5</span>) <span class="keyword">continue</span>; <span class="comment">// 視界外の魚は無視</span>
+
+<span class="comment">// 分離・整列・結合ベクトルを適用して操舵力を算出</span>
+            </div>
+          </div>
+
+          <!-- Squid -->
+          <div class="bio-content" id="bio-squid">
+            <div class="bio-text">
+              <h3>イカ <span class="en">// Jet Pulse & Spring Hovering</span></h3>
+              <p>休止とパルス推進（漏斗からの噴射）を繰り返す独特の遊泳モデル。</p>
+              <ul class="bio-points">
+                <li><strong>間欠的なパルス推進:</strong> サイクル全体の25%の期間のみ急加速（漏斗噴射）し、それ以外の期間は水の抵抗によるドラッグ（慣性スライド）で減速するメリハリのある動き。</li>
+                <li><strong>弾性ホバリング:</strong> Y方向は、目標深度（baseY）にスプリング力（ばねの弾性追従力）で緩やかに引き寄せることで、推進時の急上昇と、その後に慣性でふわふわと揺らぎながらホバリングする様子を表現。</li>
+                <li><strong>自律ベースラインドリフト:</strong> 基準となる深度（baseY）自身が常にゆっくりと不規則に上下することで、不自然な規則的振動を排除。</li>
+              </ul>
+            </div>
+            <div class="bio-code-pane">
+<span class="comment">// packages/server/src/physics/squid.ts</span>
+<span class="comment">// スプリング力による緩やかなY方向ホバリング追従</span>
+<span class="keyword">const</span> springForce = (targetY - pos.y) * <span class="number">0.02</span>;
+vel.y = (vel.y + springForce + depthForce) * <span class="number">0.88</span>;
+pos.y += vel.y;
+            </div>
+          </div>
+
+          <!-- Jellyfish -->
+          <div class="bio-content" id="bio-jellyfish">
+            <div class="bio-text">
+              <h3>クラゲ <span class="en">// Asymmetric Jet-and-Sink Model</span></h3>
+              <p>傘を開閉して水を押し出し、その後ゆっくりと沈んでいく非対称推進モデル。</p>
+              <ul class="bio-points">
+                <li><strong>推進期と弛緩期の完全分離:</strong> 周期の25%を「推進期（Jet）」、75%を「弛緩期（Sink）」に設計。推進期は上方向へ急峻なSin半周期の推進力を与え、弛緩期は自重によってゆっくり沈降。</li>
+                <li><strong>動的ばね定数（springK）制御:</strong> 推進期は目標Y座標への引き寄せばね定数を強く（`0.018`）して急上昇させ、弛緩期は極めて弱く（`0.004`）することで、慣性沈降を邪魔しないフワフワとした下降を実現。</li>
+                <li><strong>潮流でのゆらゆらドリフト:</strong> 水平方向にはほぼ推進力を持たず、微小なSin波の揺らぎと潮流に身を任せてゆっくり流される演出。</li>
+              </ul>
+            </div>
+            <div class="bio-code-pane">
+<span class="comment">// packages/server/src/physics/jellyfish.ts</span>
+<span class="keyword">if</span> (isPushing) {
+  ay -= pulseForce; <span class="comment">// 上向き推進力</span>
+  springK = <span class="number">0.018</span>;  <span class="comment">// 強く追従</span>
+} <span class="keyword">else</span> {
+  ay += sinkRate;   <span class="comment">// 自重でゆっくり沈降</span>
+  springK = <span class="number">0.004</span>;  <span class="comment">// 慣性を阻害しない弱追従</span>
+}
+            </div>
+          </div>
+
+          <!-- Shark -->
+          <div class="bio-content" id="bio-shark">
+            <div class="bio-text">
+              <h3>サメ <span class="en">// Angular Velocity Inertia Model</span></h3>
+              <p>角速度の慣性を利用し、絶対に急カーブしない大弧単独回遊モデル。</p>
+              <ul class="bio-points">
+                <li><strong>角速度慣性物理:</strong> サメの進行方向角度の更新に「角加速度制限（慣性）」を導入。前フレームの角速度を90％維持しながら操舵力を蓄積するため、巨大魚らしい重厚で優雅な旋回を実現。</li>
+                <li><strong>流れるような衝突回避:</strong> 壁や進入禁止エリア付近に接近した際も、角速度の慣性を経て大回りで回避方向へ舵を切るため、挙動がカクカクせず非常に美しい回避軌道を描きます。</li>
+                <li><strong>巨大生物のプレイン制御:</strong> 水平のうねり移動を基本とし、縦の挙動はなだらかに抑制。</li>
+              </ul>
+            </div>
+            <div class="bio-code-pane">
+<span class="comment">// packages/server/src/physics/shark.ts</span>
+<span class="comment">// 前フレームの角速度を90%維持しながら操舵力をマージ</span>
+state.angularVelocity += (desiredAngularVel - state.angularVelocity) * <span class="number">0.10</span>;
+<span class="comment">// 最大角速度を制限し、急旋回を物理的に防止</span>
+state.angularVelocity = clamp(state.angularVelocity, -maxAngVel, maxAngVel);
+state.angle += state.angularVelocity;
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Layers Section -->
+    <section id="layers">
+      <div class="container">
+        <div class="section-title">
+          <h2>奥行きを創り出す<span>ダイナミック・レイヤーシステム</span></h2>
+          <p>おえかき水族館は、前景・中景・遠景のレイヤーシステムと「ところてん方式」の動的配分によって、圧倒的な奥行き感（立体感）を創り出しています。</p>
+        </div>
+
+        <div class="layers-container">
+          <div class="layers-visual-3d">
+            <div class="layers-stack" id="layers-stack">
+              <!-- Foreground -->
+              <div class="layer-plane layer-plane-foreground">
+                <span class="layer-plane-title">Layer 0: 前景 (Foreground)</span>
+                <span class="layer-plane-specs">
+                  定員: 最大10匹<br>
+                  Scale: 1.0 (標準サイズ)<br>
+                  Opacity: 1.0 (はっきり)<br>
+                  Speed: 1.0 (手前は速い)
+                </span>
+                <div class="layer-plane-fish"></div>
+              </div>
+              <!-- Midground -->
+              <div class="layer-plane layer-plane-midground">
+                <span class="layer-plane-title">Layer 1: 中景 (Midground)</span>
+                <span class="layer-plane-specs">
+                  定員: 最大20匹<br>
+                  Scale: 0.7 (少し小さく)<br>
+                  Opacity: 0.8 (やや透明)<br>
+                  Speed: 0.6 (適度な視差)
+                </span>
+                <div class="layer-plane-fish"></div>
+              </div>
+              <!-- Background -->
+              <div class="layer-plane layer-plane-background">
+                <span class="layer-plane-title">Layer 2: 遠景 (Background)</span>
+                <span class="layer-plane-specs">
+                  定員: 最大50匹<br>
+                  Scale: 0.4 (小さく遠くに)<br>
+                  Opacity: 0.4 (霧のように霞む)<br>
+                  Speed: 0.3 (ゆっくり動く)
+                </span>
+                <div class="layer-plane-fish"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="layers-explain">
+            <h3>立体的なパララックス効果と自動負荷制御</h3>
+            <p>サーバー側の <code>layer-manager.ts</code> は、水槽内の魚たちをダイナミックに制御する以下の機能を備えています。</p>
+            
+            <div class="layers-rule-card">
+              <h4>ところてん方式の自動割り当て</h4>
+              <p>新しく魚が放流されると、新しい順に「前景 → 中景 → 遠景」へと割り当てられます。定員（合計80枠）から溢れた最も古い魚は、自動的に非表示（isAutoHidden = true / Opacity = 0）になり、水槽内の混雑と描画負荷を完全に自動で調整します。</p>
+            </div>
+
+            <div class="layers-rule-card">
+              <h4>ピン留め機能 (isPinned)</h4>
+              <p>管理画面から「ピン留め」されたお気に入りの魚は、ところてん方式の玉突き枠移動から除外され、指定したレイヤーに永続的に表示され続けます。</p>
+            </div>
+
+            <div class="layers-rule-card">
+              <h4>視差効果（パララックス）の反映</h4>
+              <p>レイヤーが奥に行くほど、<code>Scale (縮小)</code>、<code>Opacity (半透明化)</code>、<code>Speed (速度低下)</code> が乗算されます。この速度減衰によって発生する視差効果が、ディスプレイ越しに本物の水槽を覗いているような深い立体感を生み出します。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" style="background: rgba(15, 23, 42, 0.2);">
+      <div class="container">
+        <div class="section-title">
+          <h2>分散リアルタイム<span>アーキテクチャ</span></h2>
+          <p>単一のBun/Honoサーバーが物理演算と状態を管理し、複数の独立したディスプレイクライアントへWebSocketで座標をミリ秒単位でストリーミングします。</p>
+        </div>
+
+        <div class="arch-content">
+          <div class="arch-text">
+            <h3>サーバー主導・クライアント補間の極意</h3>
+            <p>魚の泳ぎロジックや衝突判定はすべてサーバー側で集中処理されます。クライアント側（ディスプレイ）は、サーバーから送られてくる魚座標情報（目標値）に対し、PixiJSのレンダリングループを用いて補間（Lerp）を実行。これにより、ネットワークパケットの揺れや遅延に左右されない、滑らかで美しい60fpsの表現力を実現しました。</p>
+            
+            <ul class="arch-specs">
+              <li class="arch-spec-item">
+                <div class="arch-spec-marker">1</div>
+                <div class="arch-spec-info">
+                  <h4>Bun native WebSocket 通信</h4>
+                  <p>Hono & Bun の高速なバイナリ/テキストソケットを利用し、クライアントへ高速配信。</p>
+                </div>
+              </li>
+              <li class="arch-spec-item">
+                <div class="arch-spec-marker">2</div>
+                <div class="arch-spec-info">
+                  <h4>PixiJS 8 WebGLレンダラー</h4>
+                  <p>最新のPixiJS 8を採用し、グラフィックボードの力を最大限に活かした超高速描画。</p>
+                </div>
+              </li>
+              <li class="arch-spec-item">
+                <div class="arch-spec-marker">3</div>
+                <div class="arch-spec-info">
+                  <h4>座標変換とViewport制御</h4>
+                  <p>Displayをドラッグするだけで、複数モニターにまたがる巨大パノラマ水槽をリアルタイムに構築可能。</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="arch-diagram">
+            <div style="color: var(--primary); font-weight: bold; margin-bottom: 20px; font-family: var(--font-title);">分散システムフロー</div>
+            
+            <div class="dia-row">
+              <div class="dia-node active-node-pink">
+                <h5>Scanner / AI Node</h5>
+                <span>rembg (背景透過)</span>
+              </div>
+              <div class="dia-node active-node-pink">
+                <h5>Controller</h5>
+                <span>魚の編集・放流</span>
+              </div>
+            </div>
+
+            <div class="dia-label">POST /api/scan & WebSocket</div>
+
+            <div class="dia-row" style="margin-top: 20px;">
+              <div class="dia-node server-node" style="padding: 24px;">
+                <h5>Bun Server (Hono)</h5>
+                <span>物理演算ループ (16ms) // WebSocket配信</span>
+              </div>
+            </div>
+
+            <div class="dia-label" style="transform: translate(-50%, 4px);">60fps Frame Streaming</div>
+
+            <div class="dia-row" style="margin-top: 30px;">
+              <div class="dia-node active-node">
+                <h5>Display A (PixiJS)</h5>
+                <span>Viewport x: 0~1920</span>
+              </div>
+              <div class="dia-node active-node">
+                <h5>Display B (PixiJS)</h5>
+                <span>Viewport x: 1920~3840</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Craftsmanship Section -->
+    <section id="features">
+      <div class="container">
+        <div class="section-title">
+          <h2>システムに込められた<span>技術的こだわり</span></h2>
+          <p>コードの細部に宿る、生物的表現への探究心と展示運用における高い堅牢性の設計。</p>
+        </div>
+
+        <div class="features-grid">
+          
+          <!-- Boids with FOV -->
+          <div class="feature-card">
+            <div class="feature-header">
+              <div class="feature-icon-wrapper">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3>視野制限(FOV)付きBoids物理</h3>
+            </div>
+            <p>通常のBoids（分離・整列・結合）に「視野角制限（Field of View）」を実装。背後120度の他魚をブラインドにすることで、単なる球体の集まりではなく、先頭を追うような美しい「帯状のストリーム（潮流）」を描く群れを数学的に実現しています。</p>
+            <div class="feature-code">
+<span class="comment">// packages/server/src/physics/school.ts</span>
+<span class="keyword">const</span> dot = (toOtherX / dist) * hx + (toOtherY / dist) * hy;
+<span class="keyword">if</span> (dot &lt; -<span class="number">0.5</span>) <span class="keyword">continue</span>; <span class="comment">// 背後120度は視界から遮断</span>
+            </div>
+          </div>
+
+          <!-- Squid Spring Hovering -->
+          <div class="feature-card">
+            <div class="feature-header">
+              <div class="feature-icon-wrapper">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <h3>イカのパルス推進と弾性ホバリング</h3>
+            </div>
+            <p>イカ（Squid）モデルには、「漏斗（噴射口）からのパルス噴射」をシミュレートする急加速・ドラッグ減衰を実装。Y方向は位置を直接書き換えるのではなく、ばね弾性力（スプリング力）を加え、浮力と重力で揺らぐ独特なホバリングを実現しました。</p>
+            <div class="feature-code">
+<span class="comment">// packages/server/src/physics/squid.ts</span>
+<span class="keyword">const</span> springForce = (targetY - pos.y) * <span class="number">0.02</span>;
+vel.y = (vel.y + springForce + depthForce) * <span class="number">0.88</span>;
+            </div>
+          </div>
+
+          <!-- PNG Metadata tEXt hack -->
+          <div class="feature-card">
+            <div class="feature-header">
+              <div class="feature-icon-wrapper">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              </div>
+              <h3>PNG "tEXt" チャンクバイナリ操作</h3>
+            </div>
+            <p>魚のアセット（透過PNG）のバイナリ構造をパースし、PNG仕様の <code>tEXt</code> チャンクに設定（作成者、速度、遊泳タイプ等）を埋め込みます。外部DBに依存せず、PNGファイルそのものが自律データを持つ設計。CRC32算出も含め、Buffer操作で純粋に自前実装されています。</p>
+            <div class="feature-code">
+<span class="comment">// packages/server/src/png-metadata.ts (追加ライブラリ一切なし)</span>
+<span class="keyword">const</span> textChunk = buildTextChunk(FISH_META_KEY, JSON.stringify(meta));
+<span class="comment">// PNGシグネチャ・IHDRの直後にメタデータを挿入するバッファ操作</span>
+            </div>
+          </div>
+
+          <!-- Resilience in Production -->
+          <div class="feature-card">
+            <div class="feature-header">
+              <div class="feature-icon-wrapper">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <h3>展示展示・24時間連続稼働の堅牢性</h3>
+            </div>
+            <p>美術館や展示会場での実運用を想定し、Screen Wake Lock APIを介して画面スリープを防止。また、ネットワークや描画詰まりを検知すると、送信バッファ（キュー）が512KBを超えた時点で古いフレームを破棄し、リアルタイム性が失われないように保護します。</p>
+            <div class="feature-code">
+<span class="comment">// packages/server/src/ws-handler.ts</span>
+<span class="keyword">if</span> (ws.getBufferedAmount() &gt; <span class="number">524288</span>) {
+  <span class="keyword">return</span>; <span class="comment">// 512KBを超えたら送信キュー詰まり防止でスキップ</span>
+}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Source Code Tour Section -->
+    <section id="structure" style="background: rgba(15, 23, 42, 0.2);">
+      <div class="container">
+        <div class="section-title">
+          <h2>ソースコード構造と<span>モノレポ構成</span></h2>
+          <p>クリーンに分割された workspaces を持ち、Bunの高いパフォーマンスと快適なDX（開発体験）をフルに活かしたプロジェクト構成。</p>
+        </div>
+
+        <div class="tour-content">
+          <div class="structure-grid">
+            <div class="folder-tree">
+              <div class="tree-item active" data-target="root">
+                <span>📁 oekaki_aquarium</span>
+              </div>
+              <div class="tree-item tree-indent-1" data-target="packages">
+                <span>📁 packages/</span>
+              </div>
+              <div class="tree-item tree-indent-2" data-target="server">
+                <span>📁 server/</span>
+              </div>
+              <div class="tree-item tree-indent-2" data-target="frontend">
+                <span>📁 frontend/</span>
+              </div>
+              <div class="tree-item tree-indent-2" data-target="shared">
+                <span>📁 shared/</span>
+              </div>
+              <div class="tree-item tree-indent-1" data-target="scanner">
+                <span>📁 scanner/</span>
+              </div>
+              <div class="tree-item tree-indent-1" data-target="docs">
+                <span>📄 SPECIFICATION.md</span>
+              </div>
+            </div>
+
+            <div class="tour-detail-pane" id="detail-pane">
+              <h4 id="detail-title">📁 oekaki_aquarium (ルート)</h4>
+              <p id="detail-desc">モノレポ全体の管理を行うルートディレクトリ。BunのWorkspaces機能を使用してパッケージ間依存を束ねています。</p>
+              <ul id="detail-features">
+                <li><code>bun dev</code> コマンドで全ワークスペースの開発サーバーが一斉起動。</li>
+                <li>統一された依存管理（bun.lock / package.json）。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="cli-box">
+            <div class="cli-header">
+              <div class="cli-dot"></div>
+              <div class="cli-dot"></div>
+              <div class="cli-dot"></div>
+              <div class="cli-title">zsh - oekaki-aquarium</div>
+            </div>
+            <div class="cli-body">
+              <div class="cli-line">
+                <span class="cli-prompt">$</span>
+                <span>bun install</span>
+              </div>
+              <div class="cli-line" style="color: var(--text-muted);">
+                <span>[1/2] Installing dependencies...Done.</span>
+              </div>
+              <div class="cli-line">
+                <span class="cli-prompt">$</span>
+                <span>bun dev</span>
+              </div>
+              <div class="cli-line" style="color: var(--accent);">
+                <span>[Server]  Bun Hono Server started on port 3000</span>
+              </div>
+              <div class="cli-line" style="color: var(--primary);">
+                <span>[Vite]    Vite Frontend Dev Server running on http://localhost:5173</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 おえかき水族館プロジェクト. Built with Bun, React, PixiJS and Passion.</p>
+      <p style="font-size: 0.75rem; color: #475569; font-family: var(--font-code);">Designed & Programmed with Antigravity Agent</p>
+    </div>
+  </footer>
+
+  <script>
+    // Project Tour Interactive Script
+    const tourData = {
+      root: {
+        title: "📁 oekaki_aquarium (ルート)",
+        desc: "モノレポ全体の管理を行うルートディレクトリ。BunのWorkspaces機能を使用してパッケージ間依存を束ねています。",
+        features: [
+          "bun dev コマンドで全ワークスペースの開発サーバーが一斉起動。",
+          "統一された依存管理（bun.lock / package.json）。"
+        ]
+      },
+      packages: {
+        title: "📁 packages/",
+        desc: "モノレポの核となるサブプロジェクト群。おえかき水族館のサーバー、フロント、共有定義が疎結合に設計されています。",
+        features: [
+          "物理演算や接続管理を担うサーバー。",
+          "PixiJS描画や管理UIを持つフロントエンド。",
+          "型定義を共有する shared。"
+        ]
+      },
+      server: {
+        title: "📁 server/ (Bun/Hono サーバー)",
+        desc: "水槽内の全物理演算とWebSocket、API配信を担当する超高速バックエンド。",
+        features: [
+          "fish-manager.ts: 魚の生成、ライフサイクル、レイヤー振り分けを担当。",
+          "physics/: 生物別にチューニングされた遊泳物理シミュレータを格納。",
+          "ws-handler.ts: クライアント接続、Heartbeat、フレーム配信制御。"
+        ]
+      },
+      frontend: {
+        title: "📁 frontend/ (React / PixiJS)",
+        desc: "ユーザーや展示モニターが閲覧する4つの画面を集約したViteマルチページアプリケーション。",
+        features: [
+          "/display: PixiJS 8 による60fps座標補間＆テストパターン描画。",
+          "/manage: ドラッグ＆ドロップでディスプレイ配置・レイヤー変更ができる管理コンソール。",
+          "/controller & /guest: 魚の承認待ちキュー操作、手書きモーション設定、スマホからのエサやり。"
+        ]
+      },
+      shared: {
+        title: "📁 shared/ (共通型・定数パッケージ)",
+        desc: "サーバーとフロントエンドで相互にインポートされる、共有のTypeScript型定義および定数ライブラリ。",
+        features: [
+          "魚の設定、物理状態、WebSocketメッセージの厳密な型（Type-safe）を保証。",
+          "物理パラメータやレイヤーの共通定数の定義。"
+        ]
+      },
+      scanner: {
+        title: "📁 scanner/ (Python監視ノード)",
+        desc: "物理スキャナーなどで取り込まれた魚の画像を自動で透過処理してAPIにアップロードする監視フォルダスクリプト。",
+        features: [
+          "rembg（AI背景除去）を用いた用紙背景の自動完全透過処理。",
+          "画像の正規化・縮小処理を実行し、サーバーへシームレスにPOST。"
+        ]
+      },
+      docs: {
+        title: "📄 ドキュメント (SPECIFICATION.md / Concepts)",
+        desc: "水槽物理の調整ノウハウ、テストパターンの意味、詳細なAPI設計が緻密に記された開発ドキュメンテーション。",
+        features: [
+          "実展示での微調整フロー（Identify, Calibrationパターン）の完全解説。",
+          "状態のライフサイクルやWebSocketイベント定義のドキュメント化。"
+        ]
+      }
+    };
+
+    const treeItems = document.querySelectorAll('.tree-item');
+    const detailTitle = document.getElementById('detail-title');
+    const detailDesc = document.getElementById('detail-desc');
+    const detailFeatures = document.getElementById('detail-features');
+
+    treeItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // Remove active class
+        treeItems.forEach(i => i.classList.remove('active'));
+        
+        // Add active to current
+        item.classList.add('active');
+        
+        // Get target data
+        const target = item.getAttribute('data-target');
+        const data = tourData[target];
+        
+        if (data) {
+          detailTitle.innerText = data.title;
+          detailDesc.innerText = data.desc;
+          
+          // Render features list
+          detailFeatures.innerHTML = '';
+          data.features.forEach(feat => {
+            const li = document.createElement('li');
+            li.innerText = feat;
+            detailFeatures.appendChild(li);
+          });
+        }
+      });
+    });
+
+    // Biology Tabs Interactive Script
+    const bioTabs = document.querySelectorAll('.bio-tab');
+    const bioContents = document.querySelectorAll('.bio-content');
+
+    bioTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        bioTabs.forEach(t => t.classList.remove('active'));
+        bioContents.forEach(c => c.classList.remove('active'));
+
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    // 3D Layers mouse movement preview (rotate stack slightly on mousemove inside container)
+    const container3d = document.querySelector('.layers-visual-3d');
+    const stack3d = document.getElementById('layers-stack');
+
+    if (container3d && stack3d) {
+      container3d.addEventListener('mousemove', (e) => {
+        const rect = container3d.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width/2;
+        const y = e.clientY - rect.top - rect.height/2;
+        
+        const rotateX = 60 - (y / rect.height) * 20; // limit tilt
+        const rotateZ = -30 - (x / rect.width) * 20;
+        
+        stack3d.style.transform = `rotateX(${rotateX}deg) rotateZ(${rotateZ}deg)`;
+      });
+
+      container3d.addEventListener('mouseleave', () => {
+        stack3d.style.transform = `rotateX(60deg) rotateZ(-30deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
