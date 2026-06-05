@@ -4,6 +4,10 @@
   --muted: #62717b;
   --bg: #f6f3e9;
   --panel: #fffaf0;
+  --leaf: #4f8a3f;
+  --leaf-dark: #2d6c39;
+  --wood: #8a5a2f;
+  --sand: #e8d28d;
   --green: #22543d;
   --green-2: #2f6b4f;
   --navy: #17324d;
@@ -26,6 +30,8 @@ html {
 body {
   margin: 0;
   background:
+    radial-gradient(circle at 8% 16%, rgba(79, 138, 63, .18), transparent 18rem),
+    radial-gradient(circle at 92% 8%, rgba(143, 198, 215, .22), transparent 20rem),
     linear-gradient(90deg, rgba(34, 84, 61, .05) 1px, transparent 1px),
     linear-gradient(rgba(34, 84, 61, .05) 1px, transparent 1px),
     var(--bg);
@@ -67,8 +73,7 @@ nav,
 dt,
 .tools li,
 .award-list span,
-.badge,
-.tool-row {
+.badge {
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 }
 
@@ -130,21 +135,25 @@ nav a:hover {
   min-height: calc(100svh - 66px);
   padding: clamp(54px, 8vw, 96px) clamp(20px, 7vw, 104px);
   background:
-    linear-gradient(135deg, rgba(34, 84, 61, .1), transparent 45%),
-    linear-gradient(180deg, #fbf8ed 0%, #edf2df 100%);
+    radial-gradient(circle at 80% 20%, rgba(240, 200, 75, .28), transparent 16rem),
+    linear-gradient(135deg, rgba(79, 138, 63, .18), transparent 48%),
+    linear-gradient(180deg, #fbf8ed 0%, #e4efd8 100%);
   border-bottom: 1px solid var(--line);
+  overflow: hidden;
 }
 
 .hero::before {
   content: "";
   position: absolute;
-  right: clamp(16px, 5vw, 80px);
-  top: clamp(34px, 7vw, 90px);
-  width: clamp(120px, 18vw, 260px);
-  aspect-ratio: 1;
-  background: var(--yellow);
-  clip-path: polygon(50% 0, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
-  opacity: .18;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 120px;
+  background:
+    linear-gradient(135deg, transparent 0 22px, rgba(45, 108, 57, .22) 22px 44px, transparent 44px),
+    linear-gradient(225deg, transparent 0 18px, rgba(34, 84, 61, .18) 18px 38px, transparent 38px);
+  background-size: 70px 70px, 82px 82px;
+  opacity: .9;
 }
 
 .hero-content,
@@ -253,170 +262,228 @@ h1 {
 }
 
 .hero-visual {
-  min-height: 520px;
+  min-height: 560px;
 }
 
-.scarf {
+.forest-scene {
   position: absolute;
-  top: 6px;
-  left: 50%;
-  width: 250px;
-  height: 250px;
-  transform: translateX(-50%) rotate(45deg);
+  inset: 12px 0 78px;
   background:
-    linear-gradient(90deg, transparent 0 38%, var(--yellow) 38% 46%, transparent 46% 54%, var(--yellow) 54% 62%, transparent 62%),
-    var(--red);
-  clip-path: polygon(50% 0, 100% 45%, 62% 45%, 62% 100%, 38% 100%, 38% 45%, 0 45%);
-  border-radius: 8px;
-}
-
-.badge-main {
-  position: absolute;
-  left: 50%;
-  top: 70px;
-  transform: translateX(-50%);
-  width: 210px;
-  height: 210px;
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  padding: 26px;
-  background: #fff;
-  border: 10px solid var(--green);
-  outline: 8px solid var(--yellow);
-  clip-path: polygon(50% 0, 94% 25%, 94% 76%, 50% 100%, 6% 76%, 6% 25%);
-  color: var(--green);
-  text-align: center;
-  font-weight: 950;
-  line-height: 1.15;
-}
-
-.badge-icon {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  background: var(--navy);
-  color: #fff;
-  border-radius: 50%;
-  font-size: 2rem;
-}
-
-.flat-map {
-  position: absolute;
-  inset: auto 0 32px;
-  height: 260px;
-  background:
-    linear-gradient(90deg, rgba(23, 50, 77, .08) 1px, transparent 1px),
-    linear-gradient(rgba(23, 50, 77, .08) 1px, transparent 1px),
-    #dce8cf;
-  background-size: 34px 34px;
+    linear-gradient(180deg, #bfe0d8 0 42%, #dcefc8 42% 100%);
   border: 3px solid var(--green);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.flat-map::before {
+.forest-scene::before {
   content: "";
   position: absolute;
-  left: -24px;
-  top: 70px;
-  width: 112%;
-  height: 70px;
-  background: var(--sky);
-  transform: rotate(-9deg);
+  left: -10%;
+  right: -10%;
+  bottom: 0;
+  height: 42%;
+  background:
+    linear-gradient(135deg, transparent 0 22px, rgba(34, 84, 61, .18) 22px 44px, transparent 44px),
+    #7fb35d;
+  background-size: 68px 68px;
 }
 
-.trail {
+.sun {
   position: absolute;
-  height: 8px;
-  background: repeating-linear-gradient(90deg, var(--orange) 0 16px, transparent 16px 28px);
+  right: 42px;
+  top: 38px;
+  width: 74px;
+  height: 74px;
+  background: var(--yellow);
+  border-radius: 50%;
+}
+
+.cloud {
+  position: absolute;
+  height: 28px;
+  background: #fff;
   border-radius: 999px;
 }
 
-.t1 {
-  left: 44px;
-  right: 52px;
-  top: 76px;
-  transform: rotate(12deg);
-}
-
-.t2 {
-  left: 80px;
-  right: 120px;
-  bottom: 70px;
-  transform: rotate(-12deg);
-}
-
-.flag {
-  position: absolute;
-  width: 12px;
-  height: 86px;
-  background: var(--navy);
-  border-radius: 999px;
-}
-
-.flag::after {
+.cloud::before,
+.cloud::after {
   content: "";
   position: absolute;
-  left: 10px;
-  top: 8px;
-  width: 58px;
-  height: 36px;
-  background: var(--red);
-  clip-path: polygon(0 0, 100% 0, 78% 50%, 100% 100%, 0 100%);
+  bottom: 0;
+  background: #fff;
+  border-radius: 50%;
 }
 
-.f1 {
-  left: 70px;
-  top: 32px;
+.cloud::before {
+  left: 18px;
+  width: 38px;
+  height: 38px;
 }
 
-.f2 {
-  right: 95px;
-  bottom: 40px;
+.cloud::after {
+  right: 18px;
+  width: 48px;
+  height: 48px;
 }
 
-.tent {
+.cloud-a {
+  left: 40px;
+  top: 62px;
+  width: 138px;
+}
+
+.cloud-b {
+  right: 114px;
+  top: 118px;
+  width: 108px;
+  opacity: .82;
+}
+
+.tree {
+  position: absolute;
+  bottom: 116px;
+  width: 126px;
+  height: 210px;
+  background: var(--leaf);
+  clip-path: polygon(50% 0, 82% 32%, 66% 32%, 92% 62%, 72% 62%, 100% 100%, 0 100%, 28% 62%, 8% 62%, 34% 32%, 18% 32%);
+}
+
+.tree::after {
+  content: "";
   position: absolute;
   left: 50%;
-  bottom: 36px;
-  width: 96px;
-  height: 76px;
+  bottom: -28px;
+  width: 24px;
+  height: 62px;
   transform: translateX(-50%);
-  background: var(--yellow);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: var(--wood);
 }
 
-.tent::after {
+.tree-a {
+  left: 28px;
+  transform: scale(.9);
+}
+
+.tree-b {
+  left: 132px;
+  bottom: 132px;
+  background: var(--leaf-dark);
+}
+
+.tree-c {
+  right: 28px;
+  bottom: 120px;
+  transform: scale(1.08);
+  background: var(--green-2);
+}
+
+.river-shape {
+  position: absolute;
+  left: -34px;
+  right: -28px;
+  bottom: 34px;
+  height: 88px;
+  background: var(--sky);
+  transform: rotate(-8deg);
+  border-top: 10px solid rgba(255, 255, 255, .45);
+}
+
+.secret-base {
+  position: absolute;
+  left: 48%;
+  bottom: 118px;
+  width: 168px;
+  height: 112px;
+  transform: translateX(-50%);
+  background: var(--wood);
+  border: 8px solid #6c4122;
+  border-radius: 4px;
+}
+
+.secret-base::before {
   content: "";
   position: absolute;
-  left: 37px;
-  bottom: 0;
-  width: 22px;
-  height: 45px;
-  background: var(--orange);
+  left: -18px;
+  right: -18px;
+  top: -66px;
+  height: 72px;
+  background: var(--sand);
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
-.tool-row {
+.secret-base::after {
+  content: "";
   position: absolute;
-  left: 22px;
-  right: 22px;
+  left: 56px;
   bottom: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  width: 44px;
+  height: 58px;
+  background: #513119;
 }
 
-.tool-row span {
-  padding: 10px;
+.watch-flag {
+  position: absolute;
+  left: calc(48% + 76px);
+  bottom: 230px;
+  width: 10px;
+  height: 98px;
   background: var(--navy);
-  color: #fff;
+}
+
+.watch-flag::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 0;
+  width: 68px;
+  height: 42px;
+  background: var(--red);
+  clip-path: polygon(0 0, 100% 0, 80% 50%, 100% 100%, 0 100%);
+}
+
+.trail-dot {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.d1 { left: 84px; bottom: 116px; }
+.d2 { left: 130px; bottom: 94px; }
+.d3 { left: 180px; bottom: 84px; }
+.d4 { left: 230px; bottom: 102px; }
+
+.mission-ticket {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1.1fr repeat(3, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.mission-ticket strong,
+.mission-ticket span {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 10px;
   border-radius: var(--radius);
-  text-align: center;
-  font-size: .78rem;
   font-weight: 900;
+  text-align: center;
+}
+
+.mission-ticket strong {
+  background: var(--green);
+  color: #fff;
+}
+
+.mission-ticket span {
+  background: var(--yellow);
+  color: var(--green);
 }
 
 .section {
@@ -431,7 +498,7 @@ h1 {
   padding: clamp(28px, 5vw, 44px);
   background: #fff;
   border: 2px solid var(--line);
-  border-top: 8px solid var(--green);
+  border-left: 10px solid var(--green);
   border-radius: var(--radius);
 }
 
@@ -529,7 +596,9 @@ h1 {
 .trial {
   min-height: 300px;
   padding: 24px;
-  background: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 250, 240, .96)),
+    #fff;
   border: 2px solid var(--line);
   border-radius: var(--radius);
 }
@@ -671,6 +740,22 @@ dd {
   font-weight: 700;
 }
 
+.belongings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.belongings li {
+  padding: 8px 10px;
+  background: #eef4e8;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
 .final-cta {
   padding: clamp(70px, 10vw, 126px) 20px;
   text-align: center;
@@ -735,6 +820,10 @@ footer {
     min-height: 450px;
   }
 
+  .mission-ticket {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .trial-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -774,23 +863,51 @@ footer {
   }
 
   .hero-visual {
-    min-height: 405px;
+    min-height: 430px;
   }
 
-  .scarf {
-    width: 205px;
-    height: 205px;
+  .forest-scene {
+    inset: 0 0 98px;
   }
 
-  .badge-main {
-    top: 54px;
-    width: 172px;
-    height: 172px;
-    outline-width: 6px;
+  .tree {
+    width: 96px;
+    height: 162px;
   }
 
-  .flat-map {
-    height: 224px;
+  .tree-a {
+    left: 10px;
+  }
+
+  .tree-b {
+    left: 78px;
+  }
+
+  .tree-c {
+    right: 8px;
+  }
+
+  .secret-base {
+    width: 132px;
+    height: 92px;
+    bottom: 104px;
+  }
+
+  .watch-flag {
+    left: calc(48% + 54px);
+    bottom: 198px;
+  }
+
+  .mission-ticket {
+    left: 0;
+    right: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .mission-ticket strong,
+  .mission-ticket span {
+    min-height: 42px;
+    padding: 7px;
   }
 
   .intro,
@@ -822,6 +939,10 @@ footer {
   .info-table div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .belongings {
+    grid-template-columns: 1fr;
   }
 }
 
