@@ -32,10 +32,10 @@ body {
   margin: 0;
   background:
     radial-gradient(circle at 16px 16px, rgba(217, 75, 61, .08) 0 8px, transparent 9px),
-    radial-gradient(circle at 8% 16%, rgba(79, 138, 63, .18), transparent 18rem),
-    radial-gradient(circle at 92% 8%, rgba(143, 198, 215, .22), transparent 20rem),
-    linear-gradient(90deg, rgba(34, 84, 61, .05) 1px, transparent 1px),
-    linear-gradient(rgba(34, 84, 61, .05) 1px, transparent 1px),
+    radial-gradient(circle at 8% 16%, rgba(79, 138, 63, .12), transparent 18rem),
+    radial-gradient(circle at 92% 8%, rgba(143, 198, 215, .16), transparent 20rem),
+    linear-gradient(90deg, rgba(34, 84, 61, .032) 1px, transparent 1px),
+    linear-gradient(rgba(34, 84, 61, .032) 1px, transparent 1px),
     var(--bg);
   background-size: 28px 28px;
   color: var(--ink);
@@ -67,7 +67,7 @@ body::before {
 }
 
 body::after {
-  right: -72px;
+  right: -118px;
   bottom: 60px;
   width: 168px;
   height: 168px;
@@ -207,7 +207,7 @@ nav a:hover {
 }
 
 .deco-vine {
-  left: clamp(10px, 3vw, 42px);
+  left: clamp(-18px, 1vw, 22px);
   top: 86px;
   width: 86px;
   height: 280px;
@@ -238,8 +238,8 @@ nav a:hover {
 }
 
 .deco-compass {
-  right: clamp(18px, 6vw, 90px);
-  top: 96px;
+  right: clamp(6px, 4vw, 58px);
+  top: 100px;
   width: 128px;
   height: 128px;
   background: #fff;
@@ -260,7 +260,7 @@ nav a:hover {
 
 .deco-patch {
   left: clamp(18px, 8vw, 132px);
-  bottom: 138px;
+  bottom: 96px;
   width: 106px;
   height: 106px;
   display: grid;
@@ -275,7 +275,7 @@ nav a:hover {
 }
 
 .deco-rope {
-  right: clamp(12px, 4vw, 60px);
+  right: clamp(-28px, 2vw, 38px);
   bottom: 132px;
   width: 220px;
   height: 36px;
@@ -305,8 +305,8 @@ p {
 h1 {
   margin-bottom: 12px;
   color: var(--green);
-  font-size: clamp(3rem, 8vw, 7rem);
-  line-height: .98;
+  font-size: clamp(3rem, 6.4vw, 5.9rem);
+  line-height: 1.03;
   letter-spacing: 0;
 }
 
@@ -340,8 +340,12 @@ h1 {
 
 .lead {
   max-width: 680px;
-  color: var(--muted);
+  color: #42535f;
   font-size: clamp(1.04rem, 1.6vw, 1.2rem);
+  background: rgba(255, 250, 240, .88);
+  border-left: 6px solid rgba(79, 138, 63, .55);
+  border-radius: var(--radius);
+  padding: 14px 16px;
 }
 
 .hero-actions {
@@ -665,7 +669,7 @@ h1 {
   content: "森の記録";
   position: absolute;
   left: -10px;
-  top: 42px;
+  top: 22px;
   padding: 8px 14px;
   background: var(--orange);
   color: #fff;
@@ -682,6 +686,15 @@ h1 {
   color: var(--green);
   font-size: clamp(2rem, 4.5vw, 4rem);
   line-height: 1.12;
+}
+
+.section-copy,
+.section-heading {
+  position: relative;
+  padding: 22px 24px;
+  background: rgba(255, 250, 240, .93);
+  border: 2px solid rgba(34, 84, 61, .14);
+  border-radius: var(--radius);
 }
 
 .section-copy p,
@@ -703,6 +716,7 @@ h1 {
   border: 3px solid var(--green);
   border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: 0 0 0 10px rgba(255, 250, 240, .72);
 }
 
 .map-card::before {
@@ -913,8 +927,8 @@ h1 {
 .info::before {
   content: "準備リスト";
   position: absolute;
-  right: 0;
-  top: 42px;
+  right: 18px;
+  top: 24px;
   padding: 9px 16px;
   background: var(--yellow);
   color: var(--green);
@@ -1032,6 +1046,11 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .section-copy,
+  .section-heading {
+    padding: 20px;
+  }
+
   .hero-visual {
     min-height: 500px;
   }
@@ -1090,6 +1109,10 @@ footer {
     font-size: clamp(2.85rem, 15vw, 4.8rem);
   }
 
+  .lead {
+    padding: 12px 14px;
+  }
+
   .subtitle {
     font-size: 1.05rem;
   }
@@ -1100,11 +1123,11 @@ footer {
   }
 
   .hero-visual {
-    min-height: 560px;
+    min-height: 520px;
   }
 
   .forest-scene {
-    inset: 0 0 226px;
+    inset: 0 0 206px;
   }
 
   .tree {
