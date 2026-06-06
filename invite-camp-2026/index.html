@@ -8,9 +8,15 @@
     <meta property="og:description" content="仲間と協力し、秘密基地を作り、暗号を解き、隠された遺産を探し出せ。" />
     <meta property="og:type" content="website" />
     <title>招待キャンプ2026 | ひみつの森と伝説のハウディ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- スクロール進捗バー & 木の葉コンテナ -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="leaves-container" id="leavesContainer"></div>
     <header class="site-header" aria-label="サイトヘッダー">
       <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>招待キャンプ2026</a>
       <nav aria-label="ページ内ナビゲーション">
@@ -23,10 +29,6 @@
 
     <main id="top">
       <section class="hero">
-        <span class="deco deco-vine" aria-hidden="true"></span>
-        <span class="deco deco-compass" aria-hidden="true"></span>
-        <span class="deco deco-patch" aria-hidden="true">BOSS</span>
-        <span class="deco deco-rope" aria-hidden="true"></span>
         <div class="hero-content">
           <p class="kicker">ハウディ族の試練が、君を待っている。</p>
           <h1>招待キャンプ2026</h1>
@@ -45,21 +47,9 @@
             <a class="button secondary" href="#trials">試練を見る</a>
           </div>
         </div>
-        <div class="hero-visual" aria-label="キャンプミッションのシンボル">
+        <div class="hero-visual" aria-label="キャンプミッションのビジュアル">
           <div class="forest-scene">
-            <span class="sun" aria-hidden="true"></span>
-            <span class="cloud cloud-a" aria-hidden="true"></span>
-            <span class="cloud cloud-b" aria-hidden="true"></span>
-            <span class="tree tree-a" aria-hidden="true"></span>
-            <span class="tree tree-b" aria-hidden="true"></span>
-            <span class="tree tree-c" aria-hidden="true"></span>
-            <span class="river-shape" aria-hidden="true"></span>
-            <span class="secret-base" aria-hidden="true"></span>
-            <span class="watch-flag" aria-hidden="true"></span>
-            <span class="trail-dot d1" aria-hidden="true"></span>
-            <span class="trail-dot d2" aria-hidden="true"></span>
-            <span class="trail-dot d3" aria-hidden="true"></span>
-            <span class="trail-dot d4" aria-hidden="true"></span>
+            <img src="./assets/hero_forest_scene.png" alt="ひみつの森と秘密基地のイラスト" class="hero-image" />
           </div>
           <div class="mission-ticket">
             <strong>森の任務</strong>
@@ -90,17 +80,9 @@
             君たちに与えられた使命は、伝説の遺産を探し出し、失われた森の地図を完成させること。
           </p>
         </div>
-        <div class="map-panel reveal" aria-label="森のフラットマップ">
+        <div class="map-panel reveal" aria-label="森の冒険地図">
           <div class="map-card">
-            <span class="map-pin pin-a"></span>
-            <span class="map-pin pin-b"></span>
-            <span class="map-pin pin-c"></span>
-            <svg viewBox="0 0 420 310" role="img" aria-label="森と川の手描き地図">
-              <path d="M30 92c63-38 123-30 183 10 48 32 102 35 162 8" />
-              <path d="M52 220c67-26 131-21 192 15 42 25 88 21 139-11" />
-              <path class="river" d="M93 28c47 49 54 97 21 144-27 38-6 81 62 126" />
-              <path class="route" d="M290 36c-48 43-65 91-52 144 12 49-8 86-61 112" />
-            </svg>
+            <img src="./assets/adventure_treasure_map.png" alt="森の冒険地図" class="map-image" />
           </div>
         </div>
       </section>
@@ -175,12 +157,62 @@
             <dt>持ち物</dt>
             <dd>
               <ul class="belongings">
-                <li>ボーイハンドブック</li>
-                <li>コンパス（方位）</li>
-                <li>コンパス（円）</li>
-                <li>定規</li>
-                <li>分度器</li>
-                <li>ボーイ弁</li>
+                <li>
+                  <input type="checkbox" id="item-handbook" class="belonging-checkbox" />
+                  <label for="item-handbook">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">ボーイハンドブック</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-compass-dir" class="belonging-checkbox" />
+                  <label for="item-compass-dir">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">コンパス（方位）</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-compass-circle" class="belonging-checkbox" />
+                  <label for="item-compass-circle">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">コンパス（円）</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-ruler" class="belonging-checkbox" />
+                  <label for="item-ruler">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">定規</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-protractor" class="belonging-checkbox" />
+                  <label for="item-protractor">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">分度器</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-lunch" class="belonging-checkbox" />
+                  <label for="item-lunch">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">ボーイ弁</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-stationery" class="belonging-checkbox" />
+                  <label for="item-stationery">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">筆記用具</span>
+                  </label>
+                </li>
+                <li>
+                  <input type="checkbox" id="item-usual" class="belonging-checkbox" />
+                  <label for="item-usual">
+                    <span class="custom-checkbox"></span>
+                    <span class="item-text">いつもの持ち物</span>
+                  </label>
+                </li>
               </ul>
             </dd>
           </div>
@@ -201,6 +233,14 @@
     <footer>
       <p>招待キャンプ2026 ひみつの森と伝説のハウディ</p>
     </footer>
+
+    <!-- 画面右下のインタラクティブコンパスウィジェット -->
+    <div class="compass-widget" id="compassWidget" aria-label="冒険コンパス">
+      <div class="compass-dial">
+        <span>N</span><span>E</span><span>S</span><span>W</span>
+      </div>
+      <div class="compass-needle"></div>
+    </div>
 
     <script src="./script.js"></script>
   </body>
