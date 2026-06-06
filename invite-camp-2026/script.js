@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targets = section.querySelectorAll("h2, p, .subtitle, .event-strip, .hero-actions, .button, .map-card, .trial, .info-table > div, ul.tools li, .belongings li, .stamp");
     
     targets.forEach((target, index) => {
-      // 特殊な動きをするスタンプや地図カード、試練カード以外に、共通のフェードアップクラスを適用
+      // 特殊な動きをするスタンプや地図カード、試練カード以外に、共通 of .reveal-item を適用
       if (!target.classList.contains("stamp") && !target.classList.contains("map-card") && !target.classList.contains("trial")) {
         target.classList.add("reveal-item");
       }
@@ -121,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       // 文字盤と針の回転
-      // 針はスクロール位置に応じて激しく回転、文字盤は緩やかに逆回転してブレを防ぐ
       if (compassNeedle && compassDial) {
         const needleAngle = scrolled * 0.85; // スクロール量に比例
         const dialAngle = -scrolled * 0.15;
@@ -130,13 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // C. ヒーロー画像のパララックス (沈み込み)
+    // C. ヒーロー画像のパララックス (上に移動させて遅れを表現。隙間を防ぐために-12%移動)
     const heroImg = document.querySelector(".hero-image");
     if (heroImg && scrolled < viewHeight) {
-      heroImg.style.transform = `translateY(${scrolled * 0.12}px)`;
+      heroImg.style.transform = `translateY(${-scrolled * 0.12}px)`;
     }
 
-    // D. 地図画像のパララックス (スライド)
+    // D. 地図画像のパララックス (拡大＋スライド)
     const mapCard = document.querySelector(".map-card");
     if (mapCard) {
       const rect = mapCard.getBoundingClientRect();
