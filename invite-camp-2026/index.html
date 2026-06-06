@@ -14,9 +14,80 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- ハンコの掠れを再現する非表示のSVGフィルター -->
+    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
+      <filter id="grunge-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="0.85" />
+        </feComponentTransfer>
+      </filter>
+    </svg>
+
+    <!-- オープニング・プレローダー -->
+    <div class="preloader" id="preloader">
+      <div class="preloader-content">
+        <div class="preloader-compass-wrapper">
+          <div class="preloader-compass-glow"></div>
+          <div class="preloader-compass">
+            <!-- 羅針盤全体を1つの高精細ベクターSVGで表現 -->
+            <svg class="preloader-compass-svg" viewBox="0 0 100 100" width="100%" height="100%">
+              <!-- 盤面背景 -->
+              <circle cx="50" cy="50" r="48" fill="#ffffff" />
+              <!-- 外枠 -->
+              <circle cx="50" cy="50" r="46" fill="none" stroke="var(--panel-border)" stroke-width="2" />
+              <circle cx="50" cy="50" r="41" fill="none" stroke="var(--panel-border)" stroke-width="0.5" stroke-dasharray="1 2" />
+              <!-- 方位テキスト -->
+              <text x="50" y="22" dominant-baseline="middle" text-anchor="middle" fill="var(--muted)" font-size="10" font-weight="900">N</text>
+              <text x="81" y="52" dominant-baseline="middle" text-anchor="middle" fill="var(--muted)" font-size="8" font-weight="900">E</text>
+              <text x="50" y="81" dominant-baseline="middle" text-anchor="middle" fill="var(--muted)" font-size="8" font-weight="900">S</text>
+              <text x="19" y="52" dominant-baseline="middle" text-anchor="middle" fill="var(--muted)" font-size="8" font-weight="900">W</text>
+              <!-- 方位目盛り -->
+              <line x1="50" y1="4" x2="50" y2="10" stroke="var(--panel-border)" stroke-width="1.5" />
+              <line x1="50" y1="90" x2="50" y2="96" stroke="var(--panel-border)" stroke-width="1.5" />
+              <line x1="4" y1="50" x2="10" y2="50" stroke="var(--panel-border)" stroke-width="1.5" />
+              <line x1="90" y1="50" x2="96" y2="50" stroke="var(--panel-border)" stroke-width="1.5" />
+              <!-- 独立して回転させる針 -->
+              <g id="preloaderNeedle" style="transform-origin: 50px 50px; will-change: transform;">
+                <!-- 北を指す赤い針 -->
+                <polygon points="50,11 54,50 46,50" fill="var(--red)" />
+                <!-- 南を指す緑の針 -->
+                <polygon points="50,89 54,50 46,50" fill="var(--leaf-dark)" />
+                <!-- 中心ピン -->
+                <circle cx="50" cy="50" r="3.5" fill="#ffffff" stroke="var(--muted)" stroke-width="1" />
+                <circle cx="50" cy="50" r="1.5" fill="var(--ink)" />
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="preloader-text">探検の準備中... <span id="preloaderPercent">0</span>%</div>
+      </div>
+    </div>
+
     <!-- スクロール進捗バー & 木の葉コンテナ -->
     <div class="scroll-progress" id="scrollProgress"></div>
     <div class="leaves-container" id="leavesContainer"></div>
+    <!-- ページ全体の冒険の道SVG背景 -->
+    <div class="adventure-path-bg">
+      <svg viewBox="0 0 100 1000" preserveAspectRatio="none">
+        <path id="adventurePath" d="M 50 0 Q 75 120 50 240 T 25 480 T 75 720 T 50 1000" fill="none" stroke="rgba(16, 185, 129, 0.12)" stroke-width="2" stroke-dasharray="6 8" />
+        <path id="adventurePathActive" d="M 50 0 Q 75 120 50 240 T 25 480 T 75 720 T 50 1000" fill="none" stroke="var(--leaf)" stroke-width="3" stroke-dasharray="6 8" />
+      </svg>
+      <!-- パスを追従するピンと火花パーティクルのコンテナ -->
+      <div class="path-tracker" id="pathTracker">
+        <svg class="tracker-pin-svg" viewBox="0 0 24 24" width="28" height="28">
+          <filter id="glow-pin" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <!-- コンパスの針状のピン -->
+          <path d="M12,2 L15,9 L22,12 L15,15 L12,22 L9,15 L2,12 L9,9 Z" fill="var(--yellow)" filter="url(#glow-pin)" />
+          <circle cx="12" cy="12" r="3" fill="#fff" />
+        </svg>
+        <div class="tracker-sparkles" id="trackerSparkles"></div>
+      </div>
+    </div>
     <header class="site-header" aria-label="サイトヘッダー">
       <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>ローバー隊<br>招待キャンプ2026</a>
       <nav aria-label="ページ内ナビゲーション">
@@ -30,14 +101,19 @@
     <main id="top">
       <section class="hero">
         <div class="hero-content">
-          <p class="kicker">ハウディ族の試練が、君を待っている。</p>
           <h1>ローバー隊<br>招待キャンプ2026</h1>
           <p><br>
           </p>
           <div class="event-strip" aria-label="開催日と場所">
-            <span>2026.6.28 Sun</span>
-            <span>9:00-16:00</span>
-            <span>小川の森</span>
+            <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=%E3%83%AD%E3%83%BC%E3%83%90%E3%83%BC%E9%9A%8A%E3%80%80%E6%8B%9B%E5%BE%85%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%972026&dates=20260628T090000/20260628T160000&ctz=Asia/Tokyo&details=%E4%BB%B2%E9%96%93%E3%81%A8%E5%8D%94%E5%8A%9B%E3%81%97%E3%80%81%E7%A7%98%E5%AF%86%E5%9F%BA%E5%9C%B0%E3%82%92%E4%BD%9C%E3%82%8A%E3%80%81%E6%9A%97%E5%8F%B7%E3%82%92%E8%A7%A3%E3%81%8D%E3%80%81%E9%9A%A5%E3%81%95%E3%82%8C%E3%81%9F%E9%81%BA%E7%94%A3%E3%82%92%E6%8E%A2%E3%81%97%E5%87%BA%E3%81%9B%EF%BC%81%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E8%A9%A6%E9%80%B4%E3%82%92%E4%B9%97%E3%82%8A%E8%B6%8A%E3%81%88%E3%80%81%E6%9C%AC%E7%89%A9%E3%81%AE%E6%8E%A2%E6%A4%9C%E5%AE%B6%E3%81%AB%E3%81%AA%E3%82%8D%E3%81%86%E3%80%82&location=%E5%B0%8F%E5%B7%9D%E3%81%AE%E6%A3%AE" target="_blank" rel="noopener" class="event-strip-link event-cal-link" title="Googleカレンダーに登録">
+              <span>2026.6.28 Sun</span>
+              <span>9:00-16:00</span>
+              <span class="action-tag">カレンダー登録</span>
+            </a>
+            <a href="https://www.google.com/maps/search/?api=1&query=35.92730530741514,139.9990504842189" target="_blank" rel="noopener" class="event-strip-link event-map-link" title="地図を開く">
+              <span>小川の森</span>
+              <span class="action-tag">地図を見る</span>
+            </a>
           </div>
           <p class="lead">
             君たちはまだ見習いの「ハウディージュニア」。年に一度だけ現れるハウディ族のボスが、
@@ -48,15 +124,15 @@
             <a class="button secondary" href="#trials">試練を見る</a>
           </div>
         </div>
-        <div class="hero-visual" aria-label="キャンプミッションのビジュアル">
+        <div class="hero-visual" aria-label="キャンプミッション of ビジュアル">
           <div class="forest-scene">
             <img src="./assets/hero_forest_scene.png" alt="ひみつの森と秘密基地のイラスト" class="hero-image" />
           </div>
           <div class="mission-ticket">
             <strong>森の任務</strong>
-            <span>秘密基地を作れ</span>
-            <span>暗号を解け</span>
-            <span>地図を完成させろ</span>
+            <span>五感を研ぎ澄ませ</span>
+            <span>仲間と協力せよ</span>
+            <span>一歩を踏み出せ</span>
           </div>
         </div>
       </section>
@@ -89,47 +165,107 @@
       </section>
 
       <section id="trials" class="section trials">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Top Secret</p>
-          <h2>5つの試練</h2>
-          <p>試練の内容は当日まで秘密。森に入った者だけが、ハウディ族から任務を受け取ることができる。</p>
-        </div>
-        <div class="trial-grid">
-          <article class="trial reveal locked">
-            <span class="num">01</span>
-            <h3>試練その一</h3>
-            <p class="mission-name">当日発表</p>
-            <p>耳をすませ。森から最初の合図が届く。</p>
-          </article>
-          <article class="trial reveal locked">
-            <span class="num">02</span>
-            <h3>試練その二</h3>
-            <p class="mission-name">当日発表</p>
-            <p>仲間と考え、動き、次の手がかりをつかめ。</p>
-          </article>
-          <article class="trial reveal locked">
-            <span class="num">03</span>
-            <h3>試練その三</h3>
-            <p class="mission-name">当日発表</p>
-            <p>知恵と道具を使う場面がやってくる。</p>
-          </article>
-          <article class="trial reveal locked">
-            <span class="num">04</span>
-            <h3>試練その四</h3>
-            <p class="mission-name">当日発表</p>
-            <p>森の奥に進むほど、任務はむずかしくなる。</p>
-          </article>
-          <article class="trial reveal wide locked">
-            <span class="num">05</span>
-            <h3>最後の試練</h3>
-            <p class="mission-name">当日発表</p>
-            <p>最後に何が待っているかは、ボスだけが知っている。</p>
-          </article>
+        <div class="trials-wrapper">
+          <div class="section-heading">
+            <p class="eyebrow">Top Secret</p>
+            <h2 class="split-txt">5つの試練</h2>
+            <p>試練の内容は当日まで秘密。森に入った者だけが、ハウディ族から任務を受け取ることができる。</p>
+          </div>
+          <div class="trial-horizontal-container">
+            <div class="trial-grid">
+              <article class="trial locked">
+                <span class="num">01</span>
+                <h3>試練その一</h3>
+                <p class="mission-name">当日発表</p>
+                <p>耳をすませ。森から最初の合図が届く。</p>
+              </article>
+              <article class="trial locked">
+                <span class="num">02</span>
+                <h3>試練その二</h3>
+                <p class="mission-name">当日発表</p>
+                <p>仲間と考え、動き、次の手がかりをつかめ。</p>
+              </article>
+              <article class="trial locked">
+                <span class="num">03</span>
+                <h3>試練その三</h3>
+                <p class="mission-name">当日発表</p>
+                <p>知恵と道具を使う場面がやってくる。</p>
+              </article>
+              <article class="trial locked">
+                <span class="num">04</span>
+                <h3>試練その四</h3>
+                <p class="mission-name">当日発表</p>
+                <p>森の奥に進むほど、任務はむずかしくなる。</p>
+              </article>
+              <article class="trial wide locked">
+                <span class="num">05</span>
+                <h3>最後の試練</h3>
+                <p class="mission-name">当日発表</p>
+                <p>最後に何が待っているかは、ボスだけが知っている。</p>
+              </article>
+            </div>
+          </div>
         </div>
       </section>
 
       <section id="mission" class="classified section reveal">
-        <div class="stamp">MISSION</div>
+        <!-- 封筒・指令書・ハンコを統合した冒険者ギミック -->
+        <div class="mission-envelope-container" id="envelopeContainer" aria-label="極秘ミッション指令書封筒">
+          <!-- 封筒背面 -->
+          <div class="envelope-back"></div>
+          
+          <!-- 封筒から引き抜かれる指令書 -->
+          <div class="mission-letter" id="missionLetter">
+            <div class="letter-stamp-target">
+              <span class="letter-top-secret-tag">CONFIDENTIAL</span>
+              <h3>極秘任務指令</h3>
+              <p class="letter-subtitle">Rover Adventure 2026</p>
+              <div class="letter-body">
+                <p>仲間を信じ、</p>
+                <p>森の声を聴き、</p>
+                <p>知恵と五感を研ぎ澄ませ。</p>
+                <p>すべての試練を乗り越え、</p>
+                <p>失われた伝説の遺産を</p>
+                <p>探し出すのだ。</p>
+              </div>
+            </div>
+            
+            <!-- 指令書の上に押されるハンコ -->
+            <div class="stamp-wrapper" id="stampWrapper" aria-label="極秘ミッションスタンプ">
+              <div class="stamp">
+                <svg viewBox="0 0 120 120" width="120" height="120">
+                  <!-- 外枠の丸印 -->
+                  <circle cx="60" cy="60" r="53" fill="none" stroke="currentColor" stroke-width="4.5" />
+                  <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="1.5" />
+                  <!-- テキストの円状配置（上部と下部） -->
+                  <path id="stamp-text-path-top" d="M 18,60 A 42,42 0 0,1 102,60" fill="none" stroke="none" />
+                  <path id="stamp-text-path-bottom" d="M 102,60 A 42,42 0 0,1 18,60" fill="none" stroke="none" />
+                  <text fill="currentColor" font-size="7.5" font-weight="900" letter-spacing="0.11em">
+                    <textPath href="#stamp-text-path-top" startOffset="50%" text-anchor="middle">
+                      ★ ADVENTURE CAMP ★
+                    </textPath>
+                  </text>
+                  <text fill="currentColor" font-size="7.5" font-weight="900" letter-spacing="0.11em">
+                    <textPath href="#stamp-text-path-bottom" startOffset="50%" text-anchor="middle">
+                      TOKYO ROVER LEAGUE
+                    </textPath>
+                  </text>
+                  <!-- 中央の大きな文字や線 -->
+                  <text x="60" y="52" dominant-baseline="middle" text-anchor="middle" fill="currentColor" font-size="16" font-weight="900" letter-spacing="0.08em">極秘</text>
+                  <line x1="28" y1="63" x2="92" y2="63" stroke="currentColor" stroke-width="2.5" />
+                  <text x="60" y="77" dominant-baseline="middle" text-anchor="middle" fill="currentColor" font-size="12" font-weight="900" letter-spacing="0.12em">MISSION</text>
+                  <!-- 下部の星 -->
+                  <polygon points="60,88 62,93 67,93 63,96 64,101 60,98 56,101 57,96 53,93 58,93" fill="currentColor" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 封筒前面（ポケット状に指令書の手前に重なる） -->
+          <div class="envelope-front">
+            <div class="envelope-seal"></div> <!-- 封筒の封蝋風シール -->
+          </div>
+        </div>
         <div>
           <p class="eyebrow">Secret Mission</p>
           <h2>極秘ミッション</h2>
@@ -151,9 +287,31 @@
           <h2>開催概要</h2>
         </div>
         <dl class="info-table reveal">
-          <div><dt>日程</dt><dd>2026年6月28日（日）</dd></div>
+          <div>
+            <dt>日程</dt>
+            <dd class="info-dd-flex">
+              <span>2026年6月28日（日）</span>
+              <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=%E3%83%AD%E3%83%BC%E3%83%90%E3%83%BC%E9%9A%8A%E3%80%80%E6%8B%9B%E5%BE%85%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%972026&dates=20260628T090000/20260628T160000&ctz=Asia/Tokyo&details=%E4%BB%B2%E9%96%93%E3%81%A8%E5%8D%94%E5%8A%9B%E3%81%97%E3%80%81%E7%A7%98%E5%AF%86%E5%9F%BA%E5%9C%B0%E3%82%92%E4%BD%9C%E3%82%8A%E3%80%81%E6%9A%97%E5%8F%B7%E3%82%92%E8%A7%A3%E3%81%8D%E3%80%81%E9%9A%A5%E3%81%95%E3%82%8C%E3%81%9F%E9%81%BA%E7%94%A3%E3%82%92%E6%8E%A2%E3%81%97%E5%87%BA%E3%81%9B%EF%BC%81%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E8%A9%A6%E9%80%B4%E3%82%92%E4%B9%97%E3%82%8A%E8%B6%8A%E3%81%88%E3%80%81%E6%9C%AC%E7%89%A9%E3%81%AE%E6%8E%A2%E6%A4%9C%E5%AE%B6%E3%81%AB%E3%81%AA%E3%82%8D%E3%81%86%E3%80%B2&location=%E5%B0%8F%E5%B7%A5%E3%81%AE%E6%A3%AE" target="_blank" rel="noopener" class="info-btn btn-cal">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z" />
+                </svg>
+                <span>カレンダー登録</span>
+              </a>
+            </dd>
+          </div>
           <div><dt>時間</dt><dd>9:00〜16:00</dd></div>
-          <div><dt>場所</dt><dd>小川の森</dd></div>
+          <div>
+            <dt>場所</dt>
+            <dd class="info-dd-flex">
+              <span>小川の森</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=35.92730530741514,139.9990504842189" target="_blank" rel="noopener" class="info-btn btn-map">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                <span>地図を見る</span>
+              </a>
+            </dd>
+          </div>
           <div>
             <dt>持ち物</dt>
             <dd>
@@ -242,6 +400,13 @@
       </div>
       <div class="compass-needle"></div>
     </div>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
 
     <script src="./script.js"></script>
   </body>

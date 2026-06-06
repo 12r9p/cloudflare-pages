@@ -26,8 +26,29 @@
   box-sizing: border-box;
 }
 
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -54,7 +75,7 @@ a {
   align-items: center;
   gap: 24px;
   padding: 16px clamp(18px, 4vw, 54px);
-  background: rgba(248, 246, 240, 0.9);
+  background: rgba(248, 246, 240, 0.45); /* 透明度を上げすりガラス効果を強化 */
   border-bottom: 1px solid var(--panel-border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -183,7 +204,9 @@ nav a:active {
   gap: clamp(32px, 7vw, 92px);
   min-height: calc(100svh - 78px);
   padding: clamp(54px, 8vw, 96px) max(20px, calc((100% - 1120px) / 2));
-  background: #f2eee4;
+  background: rgba(242, 238, 228, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--panel-border);
   overflow: hidden;
 }
@@ -222,19 +245,101 @@ h1 {
 .event-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 24px;
+  perspective: 1000px;
 }
 
-.event-strip span {
-  padding: 10px 14px;
+.event-strip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-left: 4px solid var(--yellow);
   border-radius: var(--radius-sm);
   color: var(--ink);
   font-weight: 700;
-  box-shadow: 0 2px 8px var(--shadow);
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+}
+
+.event-cal-link {
+  border-left: 4px solid var(--yellow);
+}
+
+.event-map-link {
+  border-left: 4px solid var(--leaf);
+}
+
+.event-strip-link span:not(.action-tag) {
+  font-size: 0.95rem;
+}
+
+/* 馴染ませるアクションタグ */
+.event-strip-link .action-tag {
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 4px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.event-cal-link .action-tag {
+  background: rgba(217, 119, 6, 0.08);
+  color: var(--yellow);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.event-map-link .action-tag {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--leaf);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* ホバー時の極限3Dインタラクション ＆ 光沢 */
+.event-strip-link:hover {
+  transform: translateY(-4px) translateZ(10px) rotateX(6deg);
+  box-shadow: 0 10px 24px rgba(10, 30, 20, 0.1);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.event-cal-link:hover {
+  background: linear-gradient(135deg, #ffffff, #fefbf3);
+}
+
+.event-map-link:hover {
+  background: linear-gradient(135deg, #ffffff, #f0fdf4);
+}
+
+/* 光沢の走り（シャイン効果） */
+.event-strip-link::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 30%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.event-strip-link:hover::after {
+  left: 140%;
+  transition: left 0.9s cubic-bezier(0.3, 1, 0.3, 1);
 }
 
 .lead {
@@ -363,7 +468,9 @@ h1 {
   max-width: 100%;
   margin: 0;
   padding: 80px max(20px, calc((100% - 960px) / 2));
-  background: #eef3ed;
+  background: rgba(238, 243, 237, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--panel-border);
   box-shadow: none;
   border-radius: 0;
@@ -380,7 +487,9 @@ h1 {
 
 /* 3. ストーリー (ほぼ白の清潔感のあるウォームホワイト背景) */
 .story.section {
-  background: #fdfcfb;
+  background: rgba(253, 252, 251, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .story {
@@ -410,7 +519,9 @@ h1 {
 
 /* 4. 5つの試練 (温かみのある砂ベージュ背景) */
 .trials.section {
-  background: #f5f2eb;
+  background: rgba(245, 242, 235, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .trial-grid {
@@ -424,24 +535,17 @@ h1 {
   position: relative;
   min-height: 320px;
   padding: 40px 24px 32px;
-  background: #ffffff; /* 明るい背景の上に浮き立つ白カード */
-  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 185, 129, 0.22);
   border-radius: var(--radius);
   box-shadow: 0 8px 25px var(--shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   opacity: 0;
-  transform: perspective(600px) rotateX(-20deg) translateY(30px);
-  transform-origin: bottom center;
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
-}
-
-.trial.is-visible {
-  opacity: 1;
-  transform: perspective(600px) rotateX(0) translateY(0);
 }
 
 /* 試練カードのコンパス点線（最初から表示） */
@@ -517,8 +621,10 @@ h1 {
 
 .trial.wide {
   grid-column: span 2;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.04), #ffffff);
-  border-color: rgba(245, 158, 11, 0.25);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(255, 255, 255, 0.72));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(245, 158, 11, 0.32);
 }
 
 .trial.wide::before {
@@ -533,7 +639,9 @@ h1 {
 
 /* ロックカードのLOCKED表示と鍵マークを完全削除し、通常カードと統一 */
 .trial.locked {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-color: var(--panel-border);
 }
 
@@ -574,30 +682,189 @@ h1 {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  background: #fdfaf8;
+  background: rgba(253, 250, 248, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: none;
   border-bottom: 1px solid rgba(16, 185, 129, 0.08);
   box-shadow: none;
   border-radius: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(300px, 1fr) 1.2fr;
   align-items: center;
-  gap: 48px;
+  gap: clamp(40px, 6vw, 92px);
 }
 
-.stamp {
-  width: 120px;
-  height: 120px;
+/* 冒険者封筒コンテナ */
+.mission-envelope-container {
+  position: relative;
+  width: 290px;
+  height: 360px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  perspective: 1500px;
+  will-change: transform, opacity;
+}
+
+.envelope-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(195, 164, 121, 0.55); /* すりガラス効果 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(173, 143, 103, 0.4);
+  border-radius: 4px;
+  z-index: 1;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.08);
+}
+
+/* フラップ（蓋）が開いている状態を表現 */
+.envelope-back::before {
+  content: "";
+  position: absolute;
+  top: -38px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: rgba(189, 158, 114, 0.65); /* すりガラス効果 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(173, 143, 103, 0.4);
+  border-bottom: none;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  border-radius: 4px 4px 0 0;
+  z-index: 1;
+  transform-origin: bottom center;
+  transform: rotateX(180deg); /* 初期状態で閉じている（または裏にある） */
+  will-change: transform;
+}
+
+.envelope-front {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 78%;
+  background: rgba(175, 141, 96, 0.55); /* すりガラス効果 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(154, 122, 80, 0.4);
+  border-radius: 0 0 4px 4px;
+  z-index: 3;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 2px 14px rgba(0, 0, 0, 0.04);
+  clip-path: polygon(0 0, 28% 0, 50% 28%, 72% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.envelope-seal {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  background: radial-gradient(circle, #dc2626, #991b1b);
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  z-index: 4;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
   display: grid;
   place-items: center;
-  border: 4px double var(--red);
-  color: var(--red);
-  font-size: 1.35rem;
+}
+
+.envelope-seal::after {
+  content: "R";
+  color: rgba(255, 255, 255, 0.65);
+  font-family: 'Outfit', sans-serif;
   font-weight: 900;
+  font-size: 1.15rem;
+}
+
+/* 指令書（便箋） */
+.mission-letter {
+  position: absolute;
+  left: 15px;
+  bottom: 10px;
+  width: 260px;
+  height: 320px;
+  background: #faf6eb;
+  border: 1px solid #e1d3b6;
+  border-radius: 2px;
+  z-index: 2;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.letter-stamp-target {
+  position: relative;
+  width: 100%;
+}
+
+.letter-top-secret-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: rgba(220, 38, 38, 0.6);
+  border: 1.5px solid rgba(220, 38, 38, 0.6);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.12em;
+  transform: rotate(-8deg);
+  margin-bottom: 12px;
+  filter: url(#grunge-filter);
+}
+
+.mission-letter h3 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--panel-border);
+  padding-bottom: 6px;
+}
+
+.letter-subtitle {
+  margin: 0 0 16px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
   letter-spacing: 0.08em;
-  transform: rotate(-15deg);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 0 15px rgba(244, 63, 94, 0.05);
+}
+
+.letter-body {
+  color: #3f4f46;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  font-weight: 800;
+}
+
+.letter-body p {
+  margin: 0 0 4px;
+}
+
+/* 指令書内のハンコ */
+.mission-letter .stamp-wrapper {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  z-index: 5;
+  width: 110px;
+  height: 110px;
+}
+
+.mission-letter .stamp {
+  width: 110px;
+  height: 110px;
+  color: #c83c28;
+  filter: url(#grunge-filter);
+  transform: rotate(-18deg);
 }
 
 .classified ul.tools {
@@ -622,7 +889,9 @@ h1 {
 
 /* 6. 開催概要 (淡いミントグレー背景) */
 .info.section {
-  background: #f6f8f6;
+  background: rgba(246, 248, 246, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -631,7 +900,9 @@ h1 {
 .info-table {
   display: grid;
   gap: 16px;
-  background: #ffffff; /* 背景の上に置かれる白カード */
+  background: rgba(255, 255, 255, 0.75); /* すりガラス効果で背景を活かす */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 32px;
@@ -689,8 +960,10 @@ h1 {
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.1);
+  background: rgba(255, 255, 255, 0.76); /* すりガラス効果 */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(16, 185, 129, 0.16);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -774,54 +1047,21 @@ footer {
   text-align: center;
   padding: 40px 20px;
   color: var(--muted);
-  background: rgba(240, 238, 232, 0.8);
+  background: rgba(240, 238, 232, 0.45); /* すりガラス効果 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--panel-border);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-/* フェードイン表示 & スクロールアニメーションエフェクト */
-.reveal {
-  opacity: 1;
-}
-
-/* 自動スタッガードフェードイン用アイテム */
-.reveal-item {
+/* GSAPアニメーション初期値 (チラつき防止) */
+.reveal-item,
+.trial,
+.map-card,
+.stamp-wrapper {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal-item.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* 地図カードの動的フェードイン */
-.map-card {
-  opacity: 0;
-  transform: scale(0.95) rotate(-1.5deg);
-  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.map-card.is-visible {
-  opacity: 1;
-  transform: scale(1) rotate(0);
-}
-
-/* 極秘ミッションスタンプの「ドンッ」と押されるアニメーション */
-.stamp {
-  opacity: 0;
-  transform: scale(2.2) rotate(-35deg);
-  transition: opacity 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.classified.is-visible .stamp {
-  opacity: 1;
-  transform: scale(1) rotate(-15deg);
+  will-change: transform, opacity;
 }
 
 /* レスポンシブ */
@@ -1081,5 +1321,342 @@ footer {
   height: 32px;
   background: linear-gradient(180deg, var(--red) 50%, var(--leaf-dark) 50%);
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  transform-origin: center center; /* 回転中心を完全に真ん中に固定 */
   will-change: transform;
 }
+
+/* ページ全体の冒険の道SVG背景 */
+.adventure-path-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.adventure-path-bg svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* 文字分割アニメーション用の文字要素 */
+.char {
+  display: inline-block;
+  will-change: transform, opacity;
+  transform-origin: center bottom;
+}
+
+/* 5つの試練：PCでのレイアウト（横スクロールは廃止し通常の縦スクロールグリッドを維持） */
+
+/* オープニング・プレローダーのスタイル */
+.preloader {
+  position: fixed;
+  inset: -12px; /* 画面端の隙間（枠ノイズ）を完全に防ぐマージン */
+  background: var(--bg);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+.preloader-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.preloader-compass-wrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 24px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.preloader-compass {
+  width: 96px;
+  height: 96px;
+  border: 4px solid var(--panel-border);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(10, 30, 20, 0.12);
+  background: #ffffff;
+  transform-style: preserve-3d;
+  will-change: transform;
+  display: grid;
+  place-items: center;
+}
+
+.preloader-compass-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#preloaderNeedle {
+  transform-origin: 50px 50px;
+  will-change: transform;
+}
+
+.preloader-compass-glow {
+  position: absolute;
+  inset: -25px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+}
+
+.preloader-text {
+  font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+  font-weight: 900;
+  color: var(--ink);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  will-change: transform, opacity;
+}
+
+/* ヒーロー要素の初期登場アニメーション用の非表示スタイル (チラつき防止) */
+.hero-content h1,
+.hero-content .kicker,
+.hero-content .subtitle,
+.event-strip-link,
+.hero-content .lead,
+.hero-content .hero-actions .button,
+.forest-scene,
+.mission-ticket strong,
+.mission-ticket span {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* 3D空間の設定 */
+.hero,
+.story,
+.classified,
+.final-cta,
+.trials.section {
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+/* 冒険の道ピンとパーティクル */
+.path-tracker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+  pointer-events: none;
+  z-index: 3;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.tracker-pin-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(217, 119, 6, 0.45));
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.tracker-sparkles {
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.sparkle-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: radial-gradient(circle, var(--yellow) 20%, var(--orange) 80%);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.9;
+  box-shadow: 0 0 6px var(--orange);
+  will-change: transform, opacity;
+}
+
+/* チェックボックスバースト用のパーティクル */
+.cb-particle {
+  position: fixed;
+  pointer-events: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 99999;
+  will-change: transform, opacity;
+}
+
+/* 3D円環ホイールスタイル廃止 */
+
+/* 画面全体の物理変形用 will-change */
+.hero-image,
+.map-image,
+.map-card,
+.info-table {
+  will-change: transform;
+}
+
+/* スタンプラッパー（GSAPでのぼかし・回転・スケールアニメーション用） */
+.stamp-wrapper {
+  display: grid;
+  place-items: center;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* 開催概要のフレックス配置 */
+.info-dd-flex {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* アンティーク・アドベンチャー風 3D リンクボタン */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff !important;
+  box-shadow: 0 4px 10px var(--shadow);
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  text-decoration: none;
+}
+
+.info-btn svg {
+  flex-shrink: 0;
+}
+
+/* カレンダー登録：真鍮ゴールド（アンティーク真鍮） */
+.btn-cal {
+  background: linear-gradient(135deg, #b45309, #d97706);
+  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.22);
+}
+
+.btn-cal:hover {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  box-shadow: 0 8px 20px rgba(180, 83, 9, 0.35);
+}
+
+/* 地図を見る：ディープエメラルドグリーン */
+.btn-map {
+  background: linear-gradient(135deg, #047857, #10b981);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.22);
+}
+
+.btn-map:hover {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 8px 20px rgba(4, 120, 87, 0.35);
+}
+
+/* ボタンホバー時3Dティルト ＆ シャイン */
+.info-btn:hover {
+  transform: translateY(-3px) translateZ(10px) rotateX(8deg);
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.info-btn:active {
+  transform: translateY(-1px) scale(0.97);
+}
+
+.info-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.info-btn:hover::after {
+  left: 140%;
+  transition: left 0.8s cubic-bezier(0.3, 1, 0.3, 1);
+}
+
+/* 3Dティルトの光沢オーバーレイ */
+.shine-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%), rgba(255, 255, 255, 0.16) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ホバー時に光沢レイヤーを表示 */
+.forest-scene:hover .shine-overlay,
+.map-card:hover .shine-overlay,
+.trial:hover .shine-overlay,
+.mission-envelope-container:hover .shine-overlay {
+  opacity: 1;
+}
+
+/* 打刻時の衝撃波リング */
+.stamp-ripple {
+  position: absolute;
+  border: 3px solid rgba(200, 60, 40, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.1);
+  opacity: 1;
+  z-index: 9;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 640px) {
+  .info-dd-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .info-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+
