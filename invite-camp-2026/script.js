@@ -73,6 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (preloader) preloader.style.display = "none";
         // プレローダー完全退場後にヒーロー登場を実行
         playHeroIntro();
+        // プレローダーが完全に非表示になった正常なレイアウト状態でScrollTriggerを再計算
+        ScrollTrigger.refresh();
       }
     });
 
@@ -218,6 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   lenis.on('scroll', ScrollTrigger.update);
+
+  // ScrollTriggerのリフレッシュ（ピン留めによる全体の高さ変化など）をLenisに同期させる
+  ScrollTrigger.addEventListener("refresh", () => lenis.resize());
 
   gsap.ticker.add((time) => {
     lenis.raf(time * 1000);
@@ -449,12 +454,12 @@ document.addEventListener("DOMContentLoaded", () => {
           y: 0,
           rotateX: 0,
           scale: 1,
-          duration: 0.8,
+          duration: 0.6, // 0.8s から 0.6s に短縮して軽快に出現
           ease: "back.out(1.3)",
-          stagger: 0.035,
+          stagger: 0.02, // 0.035s から 0.02s に短縮し、見出し全体が素早く組み上がるように調整
           scrollTrigger: {
             trigger: title,
-            start: "top 86%",
+            start: "top 92%", // 86% から 92% に引き下げ、画面下端に入った瞬間に再生開始して読み逃しを防止
             toggleActions: "play none none none"
           }
         }
@@ -623,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   gsap.to(".hero-image", { yPercent: -14, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-  gsap.to(".map-image", { yPercent: -22, ease: "none", scrollTrigger: { trigger: ".map-card", start: "top bottom", end: "bottom top", scrub: true } });
+  gsap.to(".map-image", { yPercent: -10, ease: "none", scrollTrigger: { trigger: ".map-card", start: "top bottom", end: "bottom top", scrub: true } });
 
   document.querySelectorAll(".reveal").forEach((section) => {
     const targets = section.querySelectorAll("p, .subtitle, .event-strip, .hero-actions, .button, .info-table > div, ul.tools li, .belongings li");
@@ -634,39 +639,50 @@ document.addEventListener("DOMContentLoaded", () => {
     if (revealItems.length > 0) {
       gsap.fromTo(revealItems,
         { opacity: 0, y: 30, rotationX: 10, transformPerspective: 800 },
-        { opacity: 1, y: 0, rotationX: 0, duration: 0.9, ease: "power3.out", stagger: 0.08, scrollTrigger: { trigger: section, start: "top 83%", toggleActions: "play none none none" } }
+        { 
+          opacity: 1, 
+          y: 0, 
+          rotationX: 0, 
+          duration: 0.65, // 0.9s から 0.65s に短縮
+          ease: "power3.out", 
+          stagger: 0.04, // 0.08s から 0.04s に短縮して、文字リストやカードが素早く表示されるように改善
+          scrollTrigger: { 
+            trigger: section, 
+            start: "top 92%", // 83% から 92% に変更し、見え始めた瞬間に軽快にフェードインを開始させて読み逃しを防止
+            toggleActions: "play none none none" 
+          } 
+        }
       );
     }
   });
 
   mm.add("(min-width: 981px)", () => {
-    // 5つの試練セクションでの縦並び登場アニメーション
-    // 画面にセクションが入った際、3Dフリップ＆浮き上がりのスタッガー（時差）フェードインでプレミアム感を演出
-    gsap.fromTo(".trial",
-      { 
-        opacity: 0, 
-        scale: 0.85, 
-        y: 60, 
-        rotationX: -22, 
-        rotationY: 12,
-        transformPerspective: 1000 
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        rotationX: 0,
-        rotationY: 0,
-        duration: 0.95,
-        ease: "back.out(1.3)",
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".trial-grid",
-          start: "top 82%", // カードグリッドの上がビューポートの82%に達したときに再生開始
-          toggleActions: "play none none none"
-        }
+    const section = document.querySelector(".trials.section");
+    const container = document.querySelector(".trial-horizontal-container");
+    const grid = document.querySelector(".trial-grid");
+
+    if (!section || !container || !grid) return;
+
+    // 横スライドの移動量を計算
+    // gridの全体の幅から、コンテナの表示幅を引いた分だけ左に動かす（安全対策付き）
+    const getScrollAmount = () => {
+      const gridWidth = grid.scrollWidth;
+      const containerWidth = container.offsetWidth;
+      return gridWidth > containerWidth ? -(gridWidth - containerWidth) : 0;
+    };
+
+    // pin: trueを使わず、CSS position: stickyで固定されたwrapper内で grid を x 方向に動かすだけ
+    gsap.to(grid, {
+      x: () => getScrollAmount(),
+      ease: "none",
+      scrollTrigger: {
+        trigger: section, // 親の200vhセクションがスクロールのトリガー
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.8,
+        invalidateOnRefresh: true, // リサイズ時に計算を更新
       }
-    );
+    });
   });
 
   mm.add("(max-width: 980px)", () => {
@@ -810,7 +826,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const missionTl = gsap.timeline({
       scrollTrigger: {
         trigger: classifiedSection,
-        start: "top 52%", // 画面の中央付近にセクションが来たタイミングで開始し、確実に見せる
+        start: "top 72%", // 52% から 72% に前倒しし、ユーザーの視野に入った瞬間からアニメーションを展開開始
         toggleActions: "play none none none" // 一度表示したらそのまま状態を維持する
       }
     });
@@ -835,7 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
         rotateY: 0, 
         rotateZ: 0, 
         z: 0,
-        duration: 1.15, 
+        duration: 0.7, // 1.15s から 0.7s に短縮してスピーディに登場
         ease: "back.out(1.2)" 
       }
     );
@@ -844,10 +860,10 @@ document.addEventListener("DOMContentLoaded", () => {
     missionTl.to(".envelope-back::before", 
       { 
         rotateX: 0, 
-        duration: 0.45, 
+        duration: 0.3, // 0.45s から 0.3s に短縮
         ease: "back.out(1.5)" 
       },
-      "-=0.35"
+      "-=0.25"
     );
 
     // 3. 指令書が封筒の奥から3Dスパイラル回転しながら完全に引き抜かれる（y: -310まで引き抜いて封筒から完全に脱出）
@@ -867,7 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
         z: 120, 
         rotationY: -360, // 3Dスパイラル回転
         rotation: -8, 
-        duration: 1.1, 
+        duration: 0.6, // 1.1s から 0.6s に短縮して引き抜き速度アップ
         ease: "power2.out"
       },
       "-=0.1"
@@ -879,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
       y: -75,    // 封筒の上に重ねて置く
       z: 140,    // 手前に浮かせる
       rotation: -3,
-      duration: 0.65,
+      duration: 0.4, // 0.65s から 0.4s に短縮
       ease: "back.out(1.2)"
     });
 
@@ -896,7 +912,7 @@ document.addEventListener("DOMContentLoaded", () => {
         scale: 1, 
         rotation: -18, 
         filter: "blur(0px)", 
-        duration: 0.35, 
+        duration: 0.2, // 0.35s から 0.2s に短縮して衝撃の打撃感を強化
         ease: "power3.in", // 叩きつけの加速
         onComplete: () => {
           // 打刻衝撃のスクリーンシェイクを実行
@@ -905,13 +921,13 @@ document.addEventListener("DOMContentLoaded", () => {
           triggerStampEffects();
         }
       },
-      "+=0.1" // 封筒の上に置かれた後に少し間を置いて打刻
+      "+=0.08" // 置かれた後の待ち時間を短縮
     );
 
     // 5. ハンコが押し付けられて離れた反動のバウンド（2D軽量変形）
     missionTl.fromTo(stampWrapper,
       { scale: 0.88 },
-      { scale: 1, duration: 0.22, ease: "elastic.out(1.25, 0.45)" }
+      { scale: 1, duration: 0.15, ease: "elastic.out(1.25, 0.45)" } // 0.22s から 0.15s に短縮
     );
   }
 
@@ -1108,5 +1124,10 @@ document.addEventListener("DOMContentLoaded", () => {
         overwrite: "auto"
       });
     });
+  });
+
+  // Webフォントや画像等のリソースが完全にロードされた後、ScrollTriggerの計算値を強制リフレッシュして位置ずれ・不動バグを防ぐ
+  window.addEventListener("load", () => {
+    ScrollTrigger.refresh();
   });
 });
