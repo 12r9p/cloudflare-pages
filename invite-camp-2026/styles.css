@@ -49,6 +49,7 @@ html.lenis body {
 
 html {
   scroll-behavior: auto;
+  overflow-x: clip;
 }
 
 body {
@@ -63,6 +64,39 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100000;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+  transform: translateY(-160%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 3px solid #0b63ce;
+  outline-offset: 4px;
+}
+
+.brand,
+nav a,
+.nav-cta,
+.button,
+.event-strip-link,
+.info-btn,
+.belonging-checkbox + label {
+  min-height: 48px;
 }
 
 /* ヘッダー */
@@ -950,6 +984,7 @@ h1 {
 }
 
 .belonging-checkbox + label {
+  min-height: 52px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -984,6 +1019,11 @@ h1 {
 .belonging-checkbox:checked + label {
   background: rgba(16, 185, 129, 0.08);
   border-color: rgba(16, 185, 129, 0.35);
+}
+
+.belonging-checkbox:focus-visible + label {
+  outline: 3px solid #0b63ce;
+  outline-offset: 3px;
 }
 
 .belonging-checkbox:checked + label .custom-checkbox {
@@ -1201,6 +1241,36 @@ footer {
     scroll-behavior: auto;
   }
 
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .preloader,
+  .leaves-container,
+  .adventure-path-bg,
+  .compass-widget,
+  .scroll-progress {
+    display: none !important;
+  }
+
+  .hero-content h1,
+  .hero-content .kicker,
+  .hero-content .subtitle,
+  .event-strip-link,
+  .hero-content .lead,
+  .hero-content .hero-actions .button,
+  .forest-scene,
+  .mission-ticket strong,
+  .mission-ticket span {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   .reveal {
     opacity: 1;
     transform: none;
@@ -1416,6 +1486,10 @@ footer {
   overflow: hidden;
   pointer-events: auto;
   will-change: transform, opacity;
+}
+
+.preloader[hidden] {
+  display: none !important;
 }
 
 .preloader-content {
@@ -1698,4 +1772,3 @@ footer {
     justify-content: center;
   }
 }
-

@@ -2,18 +2,48 @@
 gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
 document.addEventListener("DOMContentLoaded", () => {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const heroIntroTargets = [
+    ".hero-content h1",
+    ".hero-content .kicker",
+    ".hero-content .subtitle",
+    ".event-strip-link",
+    ".hero-content .lead",
+    ".hero-content .hero-actions .button",
+    ".forest-scene",
+    ".mission-ticket strong",
+    ".mission-ticket span"
+  ].join(", ");
+
   // ==========================================
   // 1. オープニング・プレローダー ＆ ヒーロー・イントロ・アニメーション
   // ==========================================
   const preloader = document.getElementById("preloader");
   const percentText = document.getElementById("preloaderPercent");
   const preloaderNeedle = document.getElementById("preloaderNeedle");
+  let hasSeenIntro = false;
+
+  try {
+    hasSeenIntro = sessionStorage.getItem("camp_intro_seen") === "1";
+  } catch {
+    hasSeenIntro = false;
+  }
+
+  const skipIntro = prefersReducedMotion || hasSeenIntro;
+
+  if (skipIntro) {
+    if (preloader) {
+      preloader.hidden = true;
+      preloader.setAttribute("aria-hidden", "true");
+    }
+    gsap.set(heroIntroTargets, { opacity: 1, clearProps: "transform" });
+  } else {
 
   // オーラをゆっくり鼓動させる
   gsap.to(".preloader-compass-glow", {
     scale: 1.18,
     opacity: 0.85,
-    duration: 0.9,
+    duration: 0.45,
     repeat: -1,
     yoyo: true,
     ease: "power1.inOut"
@@ -24,8 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // 針をロード中にランダムな揺らぎを伴いながら激しく回転させる
   const needleRotationTween = gsap.to(preloaderNeedle, {
-    rotation: 3600, // 大きく回す
-    duration: 2.1,
+    rotation: 1440,
+    duration: 0.7,
     ease: "power1.inOut",
     transformOrigin: "50% 50%"
   });
@@ -70,7 +100,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const triggerPreloaderOut = () => {
     const outTl = gsap.timeline({
       onComplete: () => {
-        if (preloader) preloader.style.display = "none";
+        if (preloader) {
+          preloader.hidden = true;
+          preloader.setAttribute("aria-hidden", "true");
+        }
+        try {
+          sessionStorage.setItem("camp_intro_seen", "1");
+        } catch {
+          // Storage access is optional.
+        }
         // プレローダー完全退場後にヒーロー登場を実行
         playHeroIntro();
         // プレローダーが完全に非表示になった正常なレイアウト状態でScrollTriggerを再計算
@@ -81,8 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // A. 針を「北（0度）」にピタッとロック（3600度の位置＝真上）
     // カチッと止まる質感のために、弾性バウンドを加える
     outTl.to(preloaderNeedle, {
-      rotation: 3600,
-      duration: 0.5,
+      rotation: 1440,
+      duration: 0.18,
       ease: "back.out(2.4)", // 強めのバウンドでロックされる質感
       transformOrigin: "50% 50%",
       onComplete: () => {
@@ -100,23 +138,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // scaleを廃止し、純粋な z-axis（3D空間の奥行き）の移動のみにすることで
     // ベクターSVGの解像度を維持したままドット化・ボケ無しで滑らかに突き抜けます
     outTl.to(".preloader-content", {
-      z: 2200,
+      z: 1400,
       opacity: 0,
-      duration: 1.15,
+      duration: 0.32,
       ease: "power4.in",
       transformOrigin: "center center"
-    }, "+=0.35");
+    }, "+=0.08");
 
     outTl.to(preloader, {
       opacity: 0,
-      duration: 0.9,
+      duration: 0.2,
       ease: "power3.in"
     }, "-=0.6");
   };
 
   gsap.to(loadProgress, {
     value: 100,
-    duration: 2.1,
+    duration: 0.7,
     ease: "power2.out",
     onUpdate: () => {
       if (percentText) {
@@ -135,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       triggerPreloaderOut();
     }
   });
+  }
 
   // ヒーロー登場の超ダイナミックタイムライン（3Dカメラ同期）
   const playHeroIntro = () => {
@@ -208,32 +247,28 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 2. Lenis スムーススクロールの初期化 ＆ Velocity（速度）補間監視
   // ==========================================
-  const lenis = new Lenis({
-    duration: 1.3,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    orientation: 'vertical',
-    gestureOrientation: 'vertical',
-    smoothWheel: true,
-    wheelMultiplier: 1.0,
-    touchMultiplier: 1.5,
-    infinite: false,
-  });
-
-  lenis.on('scroll', ScrollTrigger.update);
-
-  // ScrollTriggerのリフレッシュ（ピン留めによる全体の高さ変化など）をLenisに同期させる
-  ScrollTrigger.addEventListener("refresh", () => lenis.resize());
-
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
-
-  gsap.ticker.lagSmoothing(0);
-
   const scrollSpeed = { target: 0, current: 0 };
-  lenis.on('scroll', (e) => {
-    scrollSpeed.target = e.velocity;
-  });
+
+  if (!prefersReducedMotion) {
+    const lenis = new Lenis({
+      duration: 1.05,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.2,
+      infinite: false
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+    ScrollTrigger.addEventListener("refresh", () => lenis.resize());
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+    lenis.on("scroll", (event) => {
+      scrollSpeed.target = event.velocity;
+    });
+  }
 
   // ==========================================
   // 3. スクロール速度連動ゴム弾性（Squish & Stretch）
@@ -246,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const leavesContainer = document.getElementById("leavesContainer");
   let updateLeavesPhysics = () => {};
 
-  if (leavesContainer) {
+  if (leavesContainer && !prefersReducedMotion) {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
     canvas.style.top = "0";
@@ -1078,7 +1113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   const tiltTargets = document.querySelectorAll(".forest-scene, .map-card, .trial, .mission-envelope-container");
   
-  tiltTargets.forEach(target => {
+  if (!prefersReducedMotion) tiltTargets.forEach(target => {
     // 3Dティルト用の光沢オーバーレイを動的に追加
     if (!target.querySelector(".shine-overlay")) {
       const shine = document.createElement("div");
@@ -1125,6 +1160,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
+
+  if (prefersReducedMotion) {
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    document.querySelectorAll(".reveal, .reveal-item").forEach((element) => {
+      element.classList.add("is-visible");
+    });
+    gsap.set(heroIntroTargets, { opacity: 1, clearProps: "transform" });
+  }
 
   // Webフォントや画像等のリソースが完全にロードされた後、ScrollTriggerの計算値を強制リフレッシュして位置ずれ・不動バグを防ぐ
   window.addEventListener("load", () => {

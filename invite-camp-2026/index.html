@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#top">本文へ移動</a>
     <!-- ハンコの掠れを再現する非表示のSVGフィルター -->
     <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
       <filter id="grunge-filter">
@@ -26,7 +27,7 @@
     </svg>
 
     <!-- オープニング・プレローダー -->
-    <div class="preloader" id="preloader">
+    <div class="preloader" id="preloader" role="status" aria-live="polite" aria-label="ページを読み込み中">
       <div class="preloader-content">
         <div class="preloader-compass-wrapper">
           <div class="preloader-compass-glow"></div>
@@ -98,7 +99,7 @@
       <a class="nav-cta" href="#info">概要を見る</a>
     </header>
 
-    <main id="top">
+    <main id="top" tabindex="-1">
       <section class="hero">
         <div class="hero-content">
           <h1>ローバー隊<br>招待キャンプ2026</h1>
@@ -123,7 +124,7 @@
             <a class="button secondary" href="#trials">試練を見る</a>
           </div>
         </div>
-        <div class="hero-visual" aria-label="キャンプミッション of ビジュアル">
+        <div class="hero-visual">
           <div class="forest-scene">
             <img src="./assets/backbearing.png" alt="バックベアリングを行ってる様子" class="hero-image" />
           </div>
@@ -392,7 +393,7 @@
     </footer>
 
     <!-- 画面右下のインタラクティブコンパスウィジェット -->
-    <div class="compass-widget" id="compassWidget" aria-label="冒険コンパス">
+    <div class="compass-widget" id="compassWidget" aria-hidden="true">
       <div class="compass-dial">
         <span>N</span><span>E</span><span>S</span><span>W</span>
       </div>
