@@ -272,8 +272,9 @@ h1 {
   border-left: 4px solid var(--yellow);
 }
 
-.event-map-link {
+.event-location {
   border-left: 4px solid var(--leaf);
+  cursor: default;
 }
 
 .event-strip-link span:not(.action-tag) {
@@ -297,12 +298,6 @@ h1 {
   border: 1px solid rgba(217, 119, 6, 0.2);
 }
 
-.event-map-link .action-tag {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--leaf);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
 /* ホバー時の極限3Dインタラクション ＆ 光沢 */
 .event-strip-link:hover {
   transform: translateY(-4px) translateZ(10px) rotateX(6deg);
@@ -312,10 +307,6 @@ h1 {
 
 .event-cal-link:hover {
   background: linear-gradient(135deg, #ffffff, #fefbf3);
-}
-
-.event-map-link:hover {
-  background: linear-gradient(135deg, #ffffff, #f0fdf4);
 }
 
 /* 光沢の走り（シャイン効果） */
@@ -1629,17 +1620,6 @@ footer {
   box-shadow: 0 8px 20px rgba(180, 83, 9, 0.35);
 }
 
-/* 地図を見る：ディープエメラルドグリーン */
-.btn-map {
-  background: linear-gradient(135deg, #047857, #10b981);
-  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.22);
-}
-
-.btn-map:hover {
-  background: linear-gradient(135deg, #10b981, #34d399);
-  box-shadow: 0 8px 20px rgba(4, 120, 87, 0.35);
-}
-
 /* ボタンホバー時3Dティルト ＆ シャイン */
 .info-btn:hover {
   transform: translateY(-3px) translateZ(10px) rotateX(8deg);
@@ -1718,6 +1698,4 @@ footer {
     justify-content: center;
   }
 }
-
-
 
