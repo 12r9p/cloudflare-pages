@@ -691,54 +691,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  mm.add("(min-width: 981px)", () => {
-    const section = document.querySelector(".trials.section");
-    const container = document.querySelector(".trial-horizontal-container");
-    const grid = document.querySelector(".trial-grid");
-
-    if (!section || !container || !grid) return;
-
-    // 横スライドの移動量を計算
-    // gridの全体の幅から、コンテナの表示幅を引いた分だけ左に動かす（安全対策付き）
-    const getScrollAmount = () => {
-      const gridWidth = grid.scrollWidth;
-      const containerWidth = container.offsetWidth;
-      return gridWidth > containerWidth ? -(gridWidth - containerWidth) : 0;
-    };
-
-    // pin: trueを使わず、CSS position: stickyで固定されたwrapper内で grid を x 方向に動かすだけ
-    gsap.to(grid, {
-      x: () => getScrollAmount(),
-      ease: "none",
+  gsap.fromTo(".trial",
+    { opacity: 0, y: 36, rotationX: -12, transformPerspective: 800 },
+    {
+      opacity: 1,
+      y: 0,
+      rotationX: 0,
+      duration: 0.8,
+      ease: "back.out(1.2)",
+      stagger: 0.08,
       scrollTrigger: {
-        trigger: section, // 親の200vhセクションがスクロールのトリガー
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.8,
-        invalidateOnRefresh: true, // リサイズ時に計算を更新
+        trigger: ".trial-grid",
+        start: "top 82%",
+        toggleActions: "play none none none"
       }
-    });
-  });
-
-  mm.add("(max-width: 980px)", () => {
-    gsap.fromTo(".trial",
-      { opacity: 0, rotationX: -35, z: -100, y: 50, transformPerspective: 800 },
-      {
-        opacity: 1,
-        rotationX: 0,
-        z: 0,
-        y: 0,
-        duration: 0.9,
-        ease: "back.out(1.2)",
-        stagger: 0.12,
-        scrollTrigger: {
-          trigger: ".trial-grid",
-          start: "top 83%",
-          toggleActions: "play none none none"
-        }
-      }
-    );
-  });
+    }
+  );
 
   // G. 地図カードの3Dフェードイン
   gsap.fromTo(".map-card",

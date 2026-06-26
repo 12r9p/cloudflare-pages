@@ -572,7 +572,7 @@ h1 {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  opacity: 0;
+  opacity: 1;
   will-change: transform, opacity;
 }
 
@@ -1411,67 +1411,6 @@ footer {
   display: inline-block;
   will-change: transform, opacity;
   transform-origin: center bottom;
-}
-
-/* 5つの試練：PCでのピン留め横スクロールレイアウト */
-@media (min-width: 981px) {
-  .trials.section {
-    height: 280vh; /* スクロール速度を遅くし、カードをじっくり読ませるために高さを延長 */
-    position: relative;
-    padding: 0;
-    border-bottom: none;
-  }
-
-  .trials-wrapper {
-    position: sticky;
-    top: 0;
-    height: 100vh; /* 画面ぴったりに固定 */
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding-left: max(20px, calc((100% - 1120px) / 2));
-    padding-right: max(20px, calc((100% - 1120px) / 2));
-    perspective: 1400px;
-    transform-style: preserve-3d;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-
-  .trials-wrapper .section-heading {
-    flex-shrink: 0;
-    width: 380px;
-    margin-right: 80px;
-    margin-top: 0;
-  }
-
-  .trial-horizontal-container {
-    flex-grow: 1;
-    overflow: hidden; /* カードが見出しに重なって左に突き抜けるのを防ぐマスク処理 */
-    width: 100%;
-    padding-block: 24px; /* 3Dティルト時にカードの上下がクリップされないための余白 */
-    margin-block: -24px;
-  }
-
-  .trial-grid {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 32px;
-    width: max-content;
-    margin-top: 0;
-  }
-
-  .trial {
-    width: 310px;
-    min-height: 330px;
-    flex-shrink: 0;
-    opacity: 1 !important; /* PCでは最初から完全表示し、チラつきや消滅バグを防ぐ */
-    transform: none !important;
-  }
-
-  .trial.wide {
-    width: 360px;
-    grid-column: auto; /* グリッド列の幅指定をクリア */
-  }
 }
 
 /* オープニング・プレローダーのスタイル */
